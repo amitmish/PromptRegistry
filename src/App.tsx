@@ -13,7 +13,9 @@ import {
   LogIn,
   LogOut,
   ChevronRight,
-  Heart
+  Heart,
+  Menu,
+  X
 } from 'lucide-react';
 import { auth, signInWithGoogle } from './lib/firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
@@ -46,6 +48,7 @@ export default function App() {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -184,12 +187,20 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
       {/* Header Navigation */}
-      <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 sticky top-0 z-40">
+      <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0 sticky top-0 z-40">
         <div className="flex items-center gap-3 shrink-0">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center shadow-sm">
-            <Sparkles className="w-5 h-5 text-white fill-current" />
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 -ml-2 text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center shadow-sm">
+              <Sparkles className="w-5 h-5 text-white fill-current" />
+            </div>
+            <span className="font-bold text-xl tracking-tight text-slate-800">PromptRegistry</span>
           </div>
-          <span className="font-bold text-xl tracking-tight text-slate-800">PromptRegistry</span>
         </div>
 
         <div className="hidden md:flex flex-1 max-w-xl mx-8">
@@ -233,17 +244,39 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full">
+      <div className="flex-1 flex overflow-hidden w-full relative">
+        {/* Mobile Sidebar Overlay */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 md:hidden"
+            />
+          )}
+        </AnimatePresence>
+
         {/* Sidebar */}
-        <aside className="w-full md:w-64 bg-white md:bg-transparent border-b md:border-b-0 md:border-r border-slate-200 p-6 shrink-0 overflow-y-auto">
+        <aside className={`
+          fixed md:static inset-y-0 left-0 z-40 w-72 md:w-64 bg-white md:bg-transparent border-r border-slate-200 p-6 shrink-0 overflow-y-auto transition-transform duration-300 ease-in-out transform
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
           <nav className="space-y-8">
             <div>
-              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Categories</h3>
+              <div className="flex items-center justify-between md:block mb-4">
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Categories</h3>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-slate-400">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
               <ul className="space-y-1">
                 <li 
                   onClick={() => {
                     setView('Feed');
                     setSelectedCategory('All');
+                    setIsMobileMenuOpen(false);
                   }}
                   className={`flex items-center justify-between px-3 py-2.5 rounded-lg font-medium text-sm cursor-pointer transition-all ${
                     view === 'Feed' && selectedCategory === 'All' 
@@ -262,6 +295,7 @@ export default function App() {
                     onClick={() => {
                       setView('Feed');
                       setSelectedCategory(cat.label);
+                      setIsMobileMenuOpen(false);
                     }}
                     className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
                       view === 'Feed' && selectedCategory === cat.label 
@@ -282,7 +316,14 @@ export default function App() {
               <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Workspace</h3>
               <ul className="space-y-1">
                 <li 
-                  onClick={() => user ? setView('Favorites') : signInWithGoogle()}
+                  onClick={() => {
+                    if (user) {
+                      setView('Favorites');
+                      setIsMobileMenuOpen(false);
+                    } else {
+                      signInWithGoogle();
+                    }
+                  }}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
                     view === 'Favorites'
                     ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
@@ -293,7 +334,14 @@ export default function App() {
                   <span>Favorites</span>
                 </li>
                 <li 
-                  onClick={() => user ? setView('MyPrompts') : signInWithGoogle()}
+                  onClick={() => {
+                    if (user) {
+                      setView('MyPrompts');
+                      setIsMobileMenuOpen(false);
+                    } else {
+                      signInWithGoogle();
+                    }
+                  }}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
                     view === 'MyPrompts'
                     ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
