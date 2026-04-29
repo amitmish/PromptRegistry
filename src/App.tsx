@@ -150,7 +150,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full">
         {/* Sidebar */}
         <aside className="w-full md:w-64 bg-white md:bg-transparent border-b md:border-b-0 md:border-r border-slate-200 p-6 shrink-0 overflow-y-auto">
           <nav className="space-y-8">
@@ -226,8 +226,8 @@ export default function App() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {[1, 2, 4, 5].map(i => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {[1, 2, 4, 5, 6, 7].map(i => (
                 <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 h-56 animate-pulse shadow-sm">
                   <div className="flex justify-between mb-4">
                     <div className="h-6 w-16 bg-slate-50 rounded"></div>
@@ -249,7 +249,7 @@ export default function App() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
               <AnimatePresence mode="popLayout">
                 {prompts.map((prompt) => (
                   <motion.div
