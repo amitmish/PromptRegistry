@@ -25,4 +25,6 @@ export interface Prompt {
   likesCount: number;
   likes: string[];
   usageCount: number;
+  aiModel?: string;
+  resultImage?: string;
 }

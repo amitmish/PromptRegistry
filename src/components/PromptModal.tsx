@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Copy, Check, User, Calendar, Tag } from 'lucide-react';
+import { X, Copy, Check, User, Calendar, Tag, Cpu, Eye } from 'lucide-react';
 import { Prompt } from '../types';
 import { useState } from 'react';
 
@@ -100,7 +100,33 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
                     </p>
                   </div>
                 </div>
+                {prompt.aiModel && (
+                  <div className="flex items-center space-x-3">
+                    <Cpu className="w-4 h-4 text-purple-600" />
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">AI Model</p>
+                      <p className="text-sm font-semibold text-slate-700">{prompt.aiModel}</p>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {prompt.resultImage && (
+                <div className="mb-10 group relative">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <Eye className="w-3 h-3" /> Result Example
+                  </h4>
+                  <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+                    <img 
+                      src={prompt.resultImage} 
+                      alt="Prompt Result" 
+                      className="w-full h-auto max-h-[400px] object-cover hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="mb-10">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Goal & Context</h4>

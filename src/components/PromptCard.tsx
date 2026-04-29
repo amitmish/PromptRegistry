@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Heart, Share2, Copy, Check, TrendingUp, Pencil, Trash2 } from 'lucide-react';
+import { Heart, Share2, Copy, Check, TrendingUp, Pencil, Trash2, Database, PenTool, Palette, Image as ImageIcon, Briefcase, Cpu } from 'lucide-react';
 import { Prompt } from '../types';
 import { useState, MouseEvent } from 'react';
 
@@ -53,83 +53,123 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
     }
   };
 
+  const renderCategoryIcon = (category: string) => {
+    const className = "w-10 h-10 opacity-30";
+    switch (category) {
+      case 'Coding': return <Database className={className} />;
+      case 'Writing': return <PenTool className={className} />;
+      case 'Creative': return <Palette className={className} />;
+      case 'Images': return <ImageIcon className={className} />;
+      case 'Business': return <Briefcase className={className} />;
+      default: return <PenTool className={className} />;
+    }
+  };
+
   return (
     <div
-      className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col h-full hover:border-slate-300"
+      className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col h-full hover:border-slate-300"
       onClick={() => onClick(prompt)}
       id={`prompt-card-${prompt.id}`}
     >
-      <div className="flex justify-between items-start mb-4">
-        <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase tracking-wider ${getCategoryStyles(prompt.category)}`}>
-          {prompt.category}
-        </span>
-        <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
-          {isAuthor && (
-            <div className="flex items-center gap-1">
-              <button 
-                onClick={handleEdit}
-                className="p-2 hover:bg-slate-100 rounded-full text-blue-600 hover:text-blue-700 transition-colors relative z-10"
-                title="Edit Prompt"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={handleDelete}
-                className="p-2 hover:bg-rose-100/50 rounded-full text-rose-500 hover:text-rose-600 transition-colors relative z-10"
-                title="Delete Prompt"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-          <TrendingUp className="w-3 h-3" />
-          <span>{prompt.usageCount || 0}</span>
+      <div className="relative h-40 bg-slate-50 overflow-hidden border-b border-slate-100 flex items-center justify-center">
+        {prompt.resultImage ? (
+          <img 
+            src={prompt.resultImage} 
+            alt={prompt.title} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 w-full h-full group-hover:bg-slate-100 transition-colors">
+            {renderCategoryIcon(prompt.category)}
+            <p className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{prompt.category} Prompt</p>
+          </div>
+        )}
+        <div className="absolute top-3 left-3 flex gap-2">
+          <span className={`px-2 py-1 text-[10px] font-bold rounded-lg shadow-sm backdrop-blur-md uppercase tracking-wider ${getCategoryStyles(prompt.category)}`}>
+            {prompt.category}
+          </span>
         </div>
+        {isAuthor && (
+          <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              onClick={handleEdit}
+              className="p-1.5 bg-white shadow-sm hover:bg-slate-50 rounded-lg text-blue-600 transition-colors relative z-10 border border-slate-100"
+              title="Edit Prompt"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+            <button 
+              onClick={handleDelete}
+              className="p-1.5 bg-white shadow-sm hover:bg-rose-50 rounded-lg text-rose-500 transition-colors relative z-10 border border-slate-100"
+              title="Delete Prompt"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
-      <h4 className="font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
-        {prompt.title}
-      </h4>
-      
-      <p className="text-slate-500 text-sm mb-6 line-clamp-2 italic leading-relaxed flex-grow">
-        "{prompt.description}"
-      </p>
-
-      <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold overflow-hidden shadow-inner">
-            {prompt.authorPhotoURL ? (
-              <img src={prompt.authorPhotoURL} alt={prompt.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-            ) : (
-              (prompt.authorName || 'U').charAt(0).toUpperCase()
-            )}
+      <div className="p-5 flex flex-col flex-grow">
+        <div className="flex justify-between items-start mb-2">
+          <h4 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1 flex-grow pr-2">
+            {prompt.title}
+          </h4>
+          <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+            <TrendingUp className="w-3 h-3" />
+            <span>{prompt.usageCount || 0}</span>
           </div>
-          <span className="text-xs font-medium text-slate-600">@{ (prompt.authorName || 'user').toLowerCase().replace(/\s+/g, '_')}</span>
         </div>
+
+        {prompt.aiModel && (
+          <div className="flex items-center gap-1.5 mb-3">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+              <Cpu className="w-2.5 h-2.5" />
+              <span>Best running with: <span className="text-slate-600">{prompt.aiModel}</span></span>
+            </div>
+          </div>
+        )}
         
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={handleShare}
-            className="text-slate-400 hover:text-blue-600 transition-colors"
-            title="Share direct link"
-          >
-            {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-          </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onLike(prompt.id); }}
-            className={`flex items-center gap-1 transition-colors px-1 ${
-              userId && prompt.likes?.includes(userId) ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
-            }`}
-          >
-            <Heart className={`w-3.5 h-3.5 ${userId && prompt.likes?.includes(userId) ? 'fill-current' : ''}`} />
-            <span className="text-[11px] font-bold">{prompt.likesCount || 0}</span>
-          </button>
-          <button 
-            onClick={handleCopy}
-            className="text-blue-600 text-xs font-bold hover:text-blue-700 transition-colors"
-          >
-            {copied ? 'Copied!' : 'Copy Prompt'}
-          </button>
+        <p className="text-slate-500 text-sm mb-6 line-clamp-2 italic leading-relaxed flex-grow">
+          "{prompt.description}"
+        </p>
+
+        <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold overflow-hidden shadow-inner">
+              {prompt.authorPhotoURL ? (
+                <img src={prompt.authorPhotoURL} alt={prompt.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              ) : (
+                (prompt.authorName || 'U').charAt(0).toUpperCase()
+              )}
+            </div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">@{ (prompt.authorName || 'user').toLowerCase().replace(/\s+/g, '_')}</span>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleShare}
+              className="text-slate-400 hover:text-blue-600 transition-colors"
+              title="Share direct link"
+            >
+              {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onLike(prompt.id); }}
+              className={`flex items-center gap-1 transition-colors px-1 ${
+                userId && prompt.likes?.includes(userId) ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
+              }`}
+            >
+              <Heart className={`w-3.5 h-3.5 ${userId && prompt.likes?.includes(userId) ? 'fill-current' : ''}`} />
+              <span className="text-[11px] font-bold">{prompt.likesCount || 0}</span>
+            </button>
+            <button 
+              onClick={handleCopy}
+              className="text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:text-blue-700 transition-colors bg-blue-50 px-2 py-1 rounded-lg"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
