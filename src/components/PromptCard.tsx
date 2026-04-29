@@ -14,12 +14,21 @@ interface PromptCardProps {
 
 export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, isAuthor }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
 
   const handleCopy = (e: MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(prompt.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = (e: MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}${window.location.pathname}?id=${prompt.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setShared(true);
+    setTimeout(() => setShared(false), 2000);
   };
 
   const handleEdit = (e: MouseEvent) => {
@@ -98,6 +107,13 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
         </div>
         
         <div className="flex items-center gap-4">
+          <button 
+            onClick={handleShare}
+            className="text-slate-400 hover:text-blue-600 transition-colors"
+            title="Share direct link"
+          >
+            {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
+          </button>
           <button 
             onClick={(e) => { e.stopPropagation(); onLike(prompt.id); }}
             className="flex items-center gap-1 text-slate-400 hover:text-rose-500 transition-colors px-1"

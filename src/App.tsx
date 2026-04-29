@@ -65,6 +65,22 @@ export default function App() {
     fetchPrompts();
   }, [selectedCategory]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const promptId = params.get('id');
+    
+    if (promptId && prompts.length > 0) {
+      const p = prompts.find(p => p.id === promptId);
+      if (p) {
+        setSelectedPrompt(p);
+        setIsPromptModalOpen(true);
+        
+        // Optional: clear the query param after opening to avoid re-triggering
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [prompts]);
+
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     fetchPrompts();
