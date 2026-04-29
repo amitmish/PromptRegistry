@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Heart, Share2, Copy, Check, TrendingUp, Pencil } from 'lucide-react';
+import { Heart, Share2, Copy, Check, TrendingUp, Pencil, Trash2 } from 'lucide-react';
 import { Prompt } from '../types';
 import { useState, MouseEvent } from 'react';
 
@@ -8,10 +8,11 @@ interface PromptCardProps {
   onLike: (id: string) => void;
   onClick: (prompt: Prompt) => void;
   onEdit?: (prompt: Prompt) => void;
+  onDelete?: (id: string) => void;
   isAuthor?: boolean;
 }
 
-export default function PromptCard({ prompt, onLike, onClick, onEdit, isAuthor }: PromptCardProps) {
+export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, isAuthor }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: MouseEvent) => {
@@ -24,6 +25,11 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, isAuthor }
   const handleEdit = (e: MouseEvent) => {
     e.stopPropagation();
     if (onEdit) onEdit(prompt);
+  };
+
+  const handleDelete = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) onDelete(prompt.id);
   };
 
   const getCategoryStyles = (category: string) => {
@@ -48,13 +54,22 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, isAuthor }
         </span>
         <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
           {isAuthor && (
-            <button 
-              onClick={handleEdit}
-              className="p-1 hover:bg-slate-100 rounded text-blue-600 hover:text-blue-700 transition-colors mr-1"
-              title="Edit Prompt"
-            >
-              <Pencil className="w-3 h-3" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={handleEdit}
+                className="p-2 hover:bg-slate-100 rounded-full text-blue-600 hover:text-blue-700 transition-colors relative z-10"
+                title="Edit Prompt"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={handleDelete}
+                className="p-2 hover:bg-rose-100/50 rounded-full text-rose-500 hover:text-rose-600 transition-colors relative z-10"
+                title="Delete Prompt"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           )}
           <TrendingUp className="w-3 h-3" />
           <span>{prompt.usageCount || 0}</span>

@@ -21,6 +21,7 @@ import { promptService } from './services/promptService';
 import PromptCard from './components/PromptCard';
 import PromptModal from './components/PromptModal';
 import PublishModal from './components/PublishModal';
+import DeleteConfirmModal from './components/DeleteConfirmModal';
 
 const CATEGORIES: { label: Category; icon: any }[] = [
   { label: 'Coding', icon: Code },
@@ -38,8 +39,10 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [promptToEdit, setPromptToEdit] = useState<Prompt | null>(null);
+  const [promptToDelete, setPromptToDelete] = useState<Prompt | null>(null);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -82,6 +85,22 @@ export default function App() {
   const handleEditClick = (p: Prompt) => {
     setPromptToEdit(p);
     setIsPublishModalOpen(true);
+  };
+
+  const handleDeletePrompt = (id: string) => {
+    const prompt = prompts.find(p => p.id === id);
+    if (prompt) {
+      setPromptToDelete(prompt);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (promptToDelete) {
+      await promptService.deletePrompt(promptToDelete.id);
+      fetchPrompts();
+      setPromptToDelete(null);
+    }
   };
 
   const handlePublish = async (data: any) => {
@@ -265,6 +284,7 @@ export default function App() {
                       onLike={handleLike}
                       onClick={handlePromptClick}
                       onEdit={handleEditClick}
+                      onDelete={handleDeletePrompt}
                       isAuthor={user?.uid === prompt.authorId}
                     />
                   </motion.div>
@@ -287,6 +307,13 @@ export default function App() {
         onClose={closePublishModal} 
         onPublish={handlePublish}
         initialData={promptToEdit}
+      />
+
+      <DeleteConfirmModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setPromptToDelete(null); }}
+        onConfirm={confirmDelete}
+        title={promptToDelete?.title || ''}
       />
       
       {/* Mobile FAB */}

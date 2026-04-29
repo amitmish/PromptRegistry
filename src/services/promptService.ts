@@ -124,5 +124,16 @@ export const promptService = {
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `${PROMPTS_COLLECTION}/${promptId}/likes/${userId}`);
     }
+  },
+
+  async deletePrompt(id: string) {
+    if (!auth.currentUser) throw new Error('Must be logged in to delete a prompt');
+    
+    try {
+      const docRef = doc(db, PROMPTS_COLLECTION, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `${PROMPTS_COLLECTION}/${id}`);
+    }
   }
 };
