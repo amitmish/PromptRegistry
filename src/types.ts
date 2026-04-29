@@ -1,0 +1,26 @@
+import { Timestamp } from 'firebase/firestore';
+
+export type Category = 'Coding' | 'Writing' | 'Creative' | 'Business' | 'Other';
+
+export interface UserProfile {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+  bio?: string;
+  createdAt: Timestamp | Date;
+}
+
+export interface Prompt {
+  id: string;
+  title: string;
+  content: string;
+  description: string;
+  category: Category;
+  tags: string[];
+  authorId: string;
+  authorName: string;
+  createdAt: Timestamp | Date;
+  likesCount: number;
+  usageCount: number;
+}

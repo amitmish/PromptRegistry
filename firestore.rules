@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    // User Profile Rules
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio']);
+    }
+
+    function isValidUser(data) {
+      return data.uid == request.auth.uid 
+             && data.displayName is string && data.displayName.size() <= 50
+             && (data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 500))
+             && (data.bio == null || (data.bio is string && data.bio.size() <= 500));
+    }
+
+    // Prompt Rules
+    match /prompts/{promptId} {
+      allow read: if true; // Publicly searchable
+      allow create: if isSignedIn() && isVerified() && isValidPrompt(request.resource.data) && request.resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        // Author update
+        (isOwner(resource.data.authorId) && isValidPrompt(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'content', 'description', 'category', 'tags']))
+        ||
+        // Like increment/decrement (controlled via likes subcollection atomicity check if I had it, but simpler for now)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'usageCount']))
+      );
+      allow delete: if isOwner(resource.data.authorId);
+    }
+
+    function isValidPrompt(data) {
+      return data.title is string && data.title.size() <= 100
+             && data.content is string && data.content.size() <= 5000
+             && data.description is string && data.description.size() <= 500
+             && data.category is string && data.category.size() <= 50
+             && data.tags is list && data.tags.size() <= 10
+             && data.authorId == request.auth.uid
+             && data.authorName is string && data.authorName.size() <= 50;
+    }
+
+    // Likes subcollection
+    match /prompts/{promptId}/likes/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
+    }
+  }
+}

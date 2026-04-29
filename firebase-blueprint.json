@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user in the platform.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bio": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "email"]
+    },
+    "Prompt": {
+      "title": "Prompt",
+      "description": "A shared AI prompt.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "likesCount": { "type": "number" },
+        "usageCount": { "type": "number" }
+      },
+      "required": ["title", "content", "category", "authorId"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "prompts/{promptId}": {
+      "schema": "Prompt",
+      "description": "Shared prompts."
+    },
+    "prompts/{promptId}/likes/{userId}": {
+      "schema": { "type": "object", "properties": { "createdAt": { "type": "string", "format": "date-time" } } },
+      "description": "Subcollection to track likes on a prompt."
+    }
+  }
+}
