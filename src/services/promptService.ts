@@ -248,5 +248,34 @@ export const promptService = {
     for (const sample of samples) {
       await this.createPrompt(sample);
     }
+  },
+
+  async cleanupDuplicates() {
+    if (!auth.currentUser) return;
+    
+    try {
+      const all = await this.getAllPrompts();
+      const seen = new Set<string>();
+      const toDelete: string[] = [];
+
+      for (const p of all) {
+        // Create a unique key based on content and title
+        const key = `${p.title.trim().toLowerCase()}|${p.content.trim().toLowerCase()}`;
+        if (seen.has(key)) {
+          toDelete.push(p.id);
+        } else {
+          seen.add(key);
+        }
+      }
+
+      for (const id of toDelete) {
+        await this.deletePrompt(id);
+      }
+      
+      return toDelete.length;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, PROMPTS_COLLECTION);
+      return 0;
+    }
   }
 };

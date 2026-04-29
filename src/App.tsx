@@ -13,8 +13,7 @@ import {
   LogIn,
   LogOut,
   ChevronRight,
-  Heart,
-  Database
+  Heart
 } from 'lucide-react';
 import { auth, signInWithGoogle } from './lib/firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
@@ -38,7 +37,6 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isSeeding, setIsSeeding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
   const [view, setView] = useState<'Feed' | 'MyPrompts' | 'Favorites'>('Feed');
@@ -71,17 +69,6 @@ export default function App() {
     
     setPrompts(data);
     setLoading(false);
-  };
-
-  const handleSeedData = async () => {
-    if (!user) return;
-    setIsSeeding(true);
-    try {
-      await promptService.seedSamplePrompts();
-      await fetchPrompts();
-    } finally {
-      setIsSeeding(false);
-    }
   };
 
   useEffect(() => {
@@ -316,15 +303,6 @@ export default function App() {
                   <PenTool className="w-4 h-4" />
                   <span>My Published</span>
                 </li>
-                {user?.email === 'amitfinkel100@gmail.com' && (
-                  <li 
-                    onClick={isSeeding ? undefined : handleSeedData}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all text-emerald-600 hover:bg-emerald-50 ${isSeeding ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <Database className={`w-4 h-4 ${isSeeding ? 'animate-pulse' : ''}`} />
-                    <span>{isSeeding ? 'Seeding...' : 'Seed Sample Data'}</span>
-                  </li>
-                )}
               </ul>
             </div>
           </nav>
