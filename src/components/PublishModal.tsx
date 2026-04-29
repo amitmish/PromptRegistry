@@ -133,6 +133,7 @@ export default function PublishModal({ isOpen, onClose, onPublish, initialData }
                     <option value="Coding">Coding</option>
                     <option value="Writing">Writing</option>
                     <option value="Creative">Creative</option>
+                    <option value="Images">Images</option>
                     <option value="Business">Business</option>
                     <option value="Other">Other</option>
                   </select>

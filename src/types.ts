@@ -1,6 +1,6 @@
 import { Timestamp } from 'firebase/firestore';
 
-export type Category = 'Coding' | 'Writing' | 'Creative' | 'Business' | 'Other';
+export type Category = 'Coding' | 'Writing' | 'Creative' | 'Business' | 'Images' | 'Other';
 
 export interface UserProfile {
   uid: string;

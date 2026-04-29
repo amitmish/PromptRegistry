@@ -37,6 +37,7 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
       case 'Coding': return 'bg-emerald-100 text-emerald-700';
       case 'Writing': return 'bg-blue-100 text-blue-700';
       case 'Creative': return 'bg-purple-100 text-purple-700';
+      case 'Images': return 'bg-pink-100 text-pink-700';
       case 'Business': return 'bg-amber-100 text-amber-700';
       default: return 'bg-slate-100 text-slate-700';
     }

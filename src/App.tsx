@@ -9,6 +9,7 @@ import {
   Palette, 
   Briefcase, 
   TrendingUp,
+  Image,
   LogIn,
   LogOut,
   ChevronRight,
@@ -27,6 +28,7 @@ const CATEGORIES: { label: Category; icon: any }[] = [
   { label: 'Coding', icon: Code },
   { label: 'Writing', icon: PenTool },
   { label: 'Creative', icon: Palette },
+  { label: 'Images', icon: Image },
   { label: 'Business', icon: Briefcase },
   { label: 'Other', icon: Sparkles },
 ];
