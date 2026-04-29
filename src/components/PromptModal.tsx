@@ -69,7 +69,13 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
             <div className="p-8 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 pb-10 border-b border-slate-100">
                 <div className="flex items-center space-x-3">
-                  <User className="w-4 h-4 text-blue-600" />
+                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center border border-slate-200 overflow-hidden shrink-0">
+                    {prompt.authorPhotoURL ? (
+                      <img src={prompt.authorPhotoURL} alt={prompt.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <User className="w-4 h-4 text-blue-600" />
+                    )}
+                  </div>
                   <div>
                     <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Author</p>
                     <p className="text-sm font-semibold text-slate-700">@{prompt.authorName.toLowerCase().replace(/\s+/g, '_')}</p>

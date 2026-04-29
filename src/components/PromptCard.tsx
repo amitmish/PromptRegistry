@@ -71,8 +71,12 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, isAuthor }
 
       <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold overflow-hidden">
-            {prompt.authorName.charAt(0).toUpperCase()}
+          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold overflow-hidden shadow-inner">
+            {prompt.authorPhotoURL ? (
+              <img src={prompt.authorPhotoURL} alt={prompt.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              prompt.authorName.charAt(0).toUpperCase()
+            )}
           </div>
           <span className="text-xs font-medium text-slate-600">@{prompt.authorName.toLowerCase().replace(/\s+/g, '_')}</span>
         </div>

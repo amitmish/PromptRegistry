@@ -70,6 +70,7 @@ export const promptService = {
       ...prompt,
       authorId: auth.currentUser.uid,
       authorName: auth.currentUser.displayName || 'Anonymous',
+      authorPhotoURL: auth.currentUser.photoURL || undefined,
       createdAt: serverTimestamp(),
       likesCount: 0,
       usageCount: 0,
@@ -89,7 +90,11 @@ export const promptService = {
     
     try {
       const docRef = doc(db, PROMPTS_COLLECTION, id);
-      await updateDoc(docRef, updates);
+      const finalUpdates = {
+        ...updates,
+        authorPhotoURL: auth.currentUser.photoURL || undefined
+      };
+      await updateDoc(docRef, finalUpdates);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `${PROMPTS_COLLECTION}/${id}`);
     }

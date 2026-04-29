@@ -27,6 +27,7 @@
         "tags": { "type": "array", "items": { "type": "string" } },
         "authorId": { "type": "string" },
         "authorName": { "type": "string" },
+        "authorPhotoURL": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "likesCount": { "type": "number" },
         "usageCount": { "type": "number" }

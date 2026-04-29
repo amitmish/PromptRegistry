@@ -20,6 +20,7 @@ export interface Prompt {
   tags: string[];
   authorId: string;
   authorName: string;
+  authorPhotoURL?: string;
   createdAt: Timestamp | Date;
   likesCount: number;
   usageCount: number;
