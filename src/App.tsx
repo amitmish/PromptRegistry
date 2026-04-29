@@ -39,6 +39,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
+  const [view, setView] = useState<'Feed' | 'MyPrompts' | 'Favorites'>('Feed');
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [promptToEdit, setPromptToEdit] = useState<Prompt | null>(null);
   const [promptToDelete, setPromptToDelete] = useState<Prompt | null>(null);
@@ -55,15 +56,24 @@ export default function App() {
 
   const fetchPrompts = async () => {
     setLoading(true);
-    const cat = selectedCategory === 'All' ? undefined : selectedCategory;
-    const data = await promptService.getAllPrompts(cat, searchQuery);
+    let data: Prompt[] = [];
+    
+    if (view === 'MyPrompts' && user) {
+      data = await promptService.getUserPrompts(user.uid);
+    } else if (view === 'Favorites' && user) {
+      data = await promptService.getLikedPrompts(user.uid);
+    } else {
+      const cat = selectedCategory === 'All' ? undefined : selectedCategory;
+      data = await promptService.getAllPrompts(cat, searchQuery);
+    }
+    
     setPrompts(data);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchPrompts();
-  }, [selectedCategory]);
+  }, [selectedCategory, view, user]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -91,8 +101,44 @@ export default function App() {
       signInWithGoogle();
       return;
     }
-    await promptService.likePrompt(id);
-    fetchPrompts();
+
+    // Optimistic Update
+    setPrompts(prev => prev.map(p => {
+      if (p.id === id) {
+        const likes = p.likes || [];
+        const isLiked = likes.includes(user.uid);
+        return {
+          ...p,
+          likes: isLiked ? likes.filter(uid => uid !== user.uid) : [...likes, user.uid],
+          likesCount: isLiked ? Math.max(0, (p.likesCount || 1) - 1) : (p.likesCount || 0) + 1
+        };
+      }
+      return p;
+    }));
+
+    if (selectedPrompt?.id === id) {
+      setSelectedPrompt(prev => {
+        if (!prev) return null;
+        const likes = prev.likes || [];
+        const isLiked = likes.includes(user.uid);
+        return {
+          ...prev,
+          likes: isLiked ? likes.filter(uid => uid !== user.uid) : [...likes, user.uid],
+          likesCount: isLiked ? Math.max(0, (prev.likesCount || 1) - 1) : (prev.likesCount || 0) + 1
+        };
+      });
+    }
+
+    try {
+      await promptService.toggleLike(id, user.uid);
+      // We don't fetchPrompts() here to avoid the flicker and trust our optimistic update
+      // But if we are in 'Favorites' view and just unliked, we might want to remove it eventually
+      if (view === 'Favorites') {
+        setTimeout(fetchPrompts, 1000); // Deferred refresh for Favorites view
+      }
+    } catch (error) {
+      fetchPrompts();
+    }
   };
 
   const handlePromptClick = (p: Prompt) => {
@@ -195,9 +241,12 @@ export default function App() {
               <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Categories</h3>
               <ul className="space-y-1">
                 <li 
-                  onClick={() => setSelectedCategory('All')}
+                  onClick={() => {
+                    setView('Feed');
+                    setSelectedCategory('All');
+                  }}
                   className={`flex items-center justify-between px-3 py-2.5 rounded-lg font-medium text-sm cursor-pointer transition-all ${
-                    selectedCategory === 'All' 
+                    view === 'Feed' && selectedCategory === 'All' 
                     ? 'bg-blue-50 text-blue-700 shadow-sm' 
                     : 'text-slate-600 hover:bg-slate-100'
                   }`}
@@ -210,9 +259,12 @@ export default function App() {
                 {CATEGORIES.map((cat) => (
                   <li 
                     key={cat.label}
-                    onClick={() => setSelectedCategory(cat.label)}
+                    onClick={() => {
+                      setView('Feed');
+                      setSelectedCategory(cat.label);
+                    }}
                     className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
-                      selectedCategory === cat.label 
+                      view === 'Feed' && selectedCategory === cat.label 
                       ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
                       : 'text-slate-600 hover:bg-slate-100'
                     }`}
@@ -229,11 +281,25 @@ export default function App() {
             <div>
               <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Workspace</h3>
               <ul className="space-y-1">
-                <li className="flex items-center gap-3 text-slate-600 px-3 py-2 rounded-lg text-sm hover:bg-slate-100 cursor-pointer">
-                  <Heart className="w-4 h-4" />
+                <li 
+                  onClick={() => user ? setView('Favorites') : signInWithGoogle()}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
+                    view === 'Favorites'
+                    ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
+                    : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 ${view === 'Favorites' ? 'fill-current' : ''}`} />
                   <span>Favorites</span>
                 </li>
-                <li className="flex items-center gap-3 text-slate-600 px-3 py-2 rounded-lg text-sm hover:bg-slate-100 cursor-pointer">
+                <li 
+                  onClick={() => user ? setView('MyPrompts') : signInWithGoogle()}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
+                    view === 'MyPrompts'
+                    ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
+                    : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
                   <PenTool className="w-4 h-4" />
                   <span>My Published</span>
                 </li>
@@ -246,7 +312,9 @@ export default function App() {
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Trending Prompts</h1>
+              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
+                {view === 'MyPrompts' ? 'My Published' : view === 'Favorites' ? 'My Favorites' : 'Trending Prompts'}
+              </h1>
               <p className="text-sm text-slate-500 mt-1">Discover, copy, and share high-quality AI instructions.</p>
             </div>
             <div className="flex gap-2">
@@ -304,10 +372,35 @@ export default function App() {
                       onEdit={handleEditClick}
                       onDelete={handleDeletePrompt}
                       isAuthor={user?.uid === prompt.authorId}
+                      userId={user?.uid}
                     />
                   </motion.div>
                 ))}
               </AnimatePresence>
+            </div>
+          )}
+          
+          {!loading && prompts.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                {view === 'Favorites' ? <Heart className="w-8 h-8 text-slate-300" /> : <PenTool className="w-8 h-8 text-slate-300" />}
+              </div>
+              <h3 className="text-lg font-semibold text-slate-800">
+                {view === 'Favorites' ? 'No favorites yet' : 'No prompts published'}
+              </h3>
+              <p className="text-slate-500 mt-2 max-w-xs mx-auto">
+                {view === 'Favorites' 
+                  ? 'Start exploring and heart your favorite prompts to see them here!' 
+                  : 'Share your first professional prompt with the world!'}
+              </p>
+              {view === 'MyPrompts' && (
+                <button 
+                  onClick={() => setIsPublishModalOpen(true)}
+                  className="mt-6 px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                >
+                  Publish Your First Prompt
+                </button>
+              )}
             </div>
           )}
         </main>

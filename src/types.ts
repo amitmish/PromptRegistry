@@ -23,5 +23,6 @@ export interface Prompt {
   authorPhotoURL?: string;
   createdAt: Timestamp | Date;
   likesCount: number;
+  likes: string[];
   usageCount: number;
 }

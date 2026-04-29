@@ -10,9 +10,10 @@ interface PromptCardProps {
   onEdit?: (prompt: Prompt) => void;
   onDelete?: (id: string) => void;
   isAuthor?: boolean;
+  userId?: string;
 }
 
-export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, isAuthor }: PromptCardProps) {
+export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, isAuthor, userId }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
 
@@ -100,10 +101,10 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
             {prompt.authorPhotoURL ? (
               <img src={prompt.authorPhotoURL} alt={prompt.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
-              prompt.authorName.charAt(0).toUpperCase()
+              (prompt.authorName || 'U').charAt(0).toUpperCase()
             )}
           </div>
-          <span className="text-xs font-medium text-slate-600">@{prompt.authorName.toLowerCase().replace(/\s+/g, '_')}</span>
+          <span className="text-xs font-medium text-slate-600">@{ (prompt.authorName || 'user').toLowerCase().replace(/\s+/g, '_')}</span>
         </div>
         
         <div className="flex items-center gap-4">
@@ -116,10 +117,12 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); onLike(prompt.id); }}
-            className="flex items-center gap-1 text-slate-400 hover:text-rose-500 transition-colors px-1"
+            className={`flex items-center gap-1 transition-colors px-1 ${
+              userId && prompt.likes?.includes(userId) ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
+            }`}
           >
-            <Heart className={`w-3.5 h-3.5 ${prompt.likesCount > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
-            <span className="text-[11px] font-bold">{prompt.likesCount}</span>
+            <Heart className={`w-3.5 h-3.5 ${userId && prompt.likes?.includes(userId) ? 'fill-current' : ''}`} />
+            <span className="text-[11px] font-bold">{prompt.likesCount || 0}</span>
           </button>
           <button 
             onClick={handleCopy}

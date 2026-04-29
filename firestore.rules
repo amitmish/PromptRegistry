@@ -46,8 +46,8 @@ service cloud.firestore {
         // Author update
         (isOwner(resource.data.authorId) && isValidPrompt(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'content', 'description', 'category', 'tags', 'authorPhotoURL']))
         ||
-        // Like increment/decrement (controlled via likes subcollection atomicity check if I had it, but simpler for now)
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'usageCount']))
+        // Like increment/decrement & likes array update
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'usageCount', 'likes']))
       );
       allow delete: if isOwner(resource.data.authorId);
     }
@@ -60,10 +60,11 @@ service cloud.firestore {
              && data.tags is list && data.tags.size() <= 10
              && data.authorId == request.auth.uid
              && data.authorName is string && data.authorName.size() <= 50
-             && (!('authorPhotoURL' in data) || data.authorPhotoURL == null || (data.authorPhotoURL is string && data.authorPhotoURL.size() <= 1000));
+             && (!('authorPhotoURL' in data) || data.authorPhotoURL == null || (data.authorPhotoURL is string && data.authorPhotoURL.size() <= 1000))
+             && (!('likes' in data) || data.likes is list && data.likes.size() <= 10000);
     }
 
-    // Likes subcollection
+    // Obsolete likes subcollection (keeping for backward compatibility or just removing if sure)
     match /prompts/{promptId}/likes/{userId} {
       allow read: if true;
       allow write: if isOwner(userId);

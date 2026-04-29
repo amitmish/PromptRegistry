@@ -25,6 +25,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
       case 'Coding': return 'bg-emerald-100 text-emerald-700';
       case 'Writing': return 'bg-blue-100 text-blue-700';
       case 'Creative': return 'bg-purple-100 text-purple-700';
+      case 'Images': return 'bg-pink-100 text-pink-700';
       case 'Business': return 'bg-amber-100 text-amber-700';
       default: return 'bg-slate-100 text-slate-700';
     }
@@ -78,7 +79,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
                   </div>
                   <div>
                     <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Author</p>
-                    <p className="text-sm font-semibold text-slate-700">@{prompt.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
+                    <p className="text-sm font-semibold text-slate-700">@{ (prompt.authorName || 'user').toLowerCase().replace(/\s+/g, '_')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
