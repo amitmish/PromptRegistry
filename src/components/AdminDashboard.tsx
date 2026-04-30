@@ -10,9 +10,13 @@ import {
   ArrowLeft,
   Calendar,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  Database,
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { analyticsService } from '../services/analyticsService';
+import { promptService } from '../services/promptService';
 
 interface AdminStats {
   totalVisits: number;
@@ -22,6 +26,7 @@ interface AdminStats {
   totalPrompts: number;
   userCount: number;
   promptCount: number;
+  uniqueVisits?: number;
   users: any[];
   prompts: any[];
 }
@@ -34,6 +39,10 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState(false);
+  const [seedProgress, setSeedProgress] = useState({ current: 0, total: 0 });
+  const [seedStatus, setSeedStatus] = useState<string | null>(null);
+  const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -47,7 +56,75 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
       }
     };
     fetchStats();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  const handleSeed = async (count: number) => {
+    setSeeding(true);
+    setSeedProgress({ current: 0, total: count });
+    setSeedStatus(`Initializing seed of ${count} prompts...`);
+    
+    try {
+      await promptService.seedSamplePrompts(count, (current, total) => {
+        setSeedProgress({ current, total });
+        if (current % 10 === 0 || current === total) {
+          setSeedStatus(`Seeded ${current}/${total} prompts...`);
+        }
+      });
+      
+      setSeedStatus('Refreshing data...');
+      const data = await analyticsService.getAdminStats();
+      setStats(data);
+      setSeedStatus(`Successfully seeded ${count} prompts!`);
+      setTimeout(() => setSeedStatus(null), 5000);
+    } catch (err) {
+      setSeedStatus(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const handleCleanup = async () => {
+    setSeedStatus('Cleaning duplicates...');
+    try {
+      const removed = await promptService.cleanupDuplicates();
+      const data = await analyticsService.getAdminStats();
+      setStats(data);
+      setSeedStatus(`Successfully removed ${removed} duplicates.`);
+      setTimeout(() => setSeedStatus(null), 5000);
+    } catch (err) {
+      setSeedStatus('Cleanup failed.');
+    }
+  };
+
+  const handlePurgeAndReseed = async () => {
+    setSeeding(true);
+    setSeedStatus("Starting deep purge...");
+    
+    try {
+      let totalPurged = 0;
+      let lastPurged = 1;
+      
+      // Purge in batches until empty or limit reached
+      while (lastPurged > 0 && totalPurged < 500) {
+        lastPurged = await promptService.purgeAllPrompts();
+        totalPurged += lastPurged;
+        setSeedStatus(`Purging older data... (${totalPurged} removed)`);
+        if (lastPurged > 0) await new Promise(r => setTimeout(r, 200));
+      }
+      
+      setSeedStatus(`Purge complete (${totalPurged} removed). Starting fresh seed...`);
+      await handleSeed(50);
+    } catch (err) {
+      setSeedStatus(`Operation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setShowPurgeConfirm(false);
+      setSeeding(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -124,7 +201,99 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Seeding & Maintenance Tools */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
+        <div className="flex items-center gap-2 mb-6">
+          <Database className="w-5 h-5 text-amber-600" />
+          <h3 className="font-bold text-slate-800 text-lg">System Tools</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Seeding Controls */}
+          <div>
+            <h4 className="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Data Seeding</h4>
+            <p className="text-sm text-slate-500 mb-4">Generate high-quality, ultra-detailed prompts to populate the platform.</p>
+            
+            <div className="flex flex-wrap gap-2">
+              {[10, 50, 100, 500].map(count => (
+                <button
+                  key={count}
+                  onClick={() => handleSeed(count)}
+                  disabled={seeding}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <Database className="w-4 h-4" />
+                  Seed {count}
+                </button>
+              ))}
+            </div>
+            
+            {seedStatus && (
+              <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <p className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-2">
+                  {seeding ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                  {seedStatus}
+                </p>
+                {seeding && (
+                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-blue-600"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(seedProgress.current / seedProgress.total) * 100}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Maintenance */}
+          <div>
+            <h4 className="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Maintenance</h4>
+            <p className="text-sm text-slate-500 mb-4">Optimize the database and remove redundant or low-quality information.</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleCleanup}
+                className="flex items-center gap-2 px-4 py-2 border-2 border-slate-200 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-50 transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                Remove Duplicates
+              </button>
+              
+              {!showPurgeConfirm ? (
+                <button
+                  onClick={() => setShowPurgeConfirm(true)}
+                  disabled={seeding}
+                  className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-lg text-sm font-bold hover:bg-rose-100 disabled:opacity-50 transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Purge & Re-seed (50)
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                  <button
+                    onClick={handlePurgeAndReseed}
+                    disabled={seeding}
+                    className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold hover:bg-rose-700 shadow-lg shadow-rose-200 transition-all"
+                  >
+                    Confirm Clear All?
+                  </button>
+                  <button
+                    onClick={() => setShowPurgeConfirm(false)}
+                    disabled={seeding}
+                    className="px-4 py-2 bg-slate-200 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-300 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Users */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">

@@ -150,9 +150,9 @@ export const analyticsService = {
         totalPrompts: 0
       };
 
-      // Also get user count
-      const usersSnap = await getDocs(collection(db, 'users'));
-      const promptsSnap = await getDocs(collection(db, 'prompts'));
+      // Also get user count (limited for performance)
+      const usersSnap = await getDocs(query(collection(db, 'users'), limit(50)));
+      const promptsSnap = await getDocs(query(collection(db, 'prompts'), orderBy('createdAt', 'desc'), limit(100)));
 
       return {
         ...statsData,
