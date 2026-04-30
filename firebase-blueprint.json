@@ -47,6 +47,19 @@
     "prompts/{promptId}/likes/{userId}": {
       "schema": { "type": "object", "properties": { "createdAt": { "type": "string", "format": "date-time" } } },
       "description": "Subcollection to track likes on a prompt."
+    },
+    "analytics/stats": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "totalVisits": { "type": "number" },
+          "totalShares": { "type": "number" },
+          "totalSignIns": { "type": "number" },
+          "totalLikes": { "type": "number" },
+          "totalPrompts": { "type": "number" }
+        }
+      },
+      "description": "Global application statistics."
     }
   }
 }

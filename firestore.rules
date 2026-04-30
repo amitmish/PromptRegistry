@@ -23,9 +23,15 @@ service cloud.firestore {
       return request.auth.token.email_verified == true;
     }
 
+    function isAdmin() {
+      return isSignedIn() && 
+             request.auth.token.email == "amitfinkel100@gmail.com" && 
+             request.auth.token.email_verified == true;
+    }
+
     // User Profile Rules
     match /users/{userId} {
-      allow read: if isSignedIn();
+      allow read: if isAdmin() || isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(request.resource.data);
       allow update: if isOwner(userId) && isValidUser(request.resource.data) 
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio']);
@@ -70,6 +76,12 @@ service cloud.firestore {
     match /prompts/{promptId}/likes/{userId} {
       allow read: if true;
       allow write: if isOwner(userId);
+    }
+
+    // Analytics Rules
+    match /analytics/{docId} {
+      allow read: if isAdmin();
+      allow write: if true; // Allow tracking for all users, including anonymous/unsigned
     }
   }
 }

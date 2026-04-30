@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { Heart, Share2, Copy, Check, TrendingUp, Pencil, Trash2, Database, PenTool, Palette, Image as ImageIcon, Briefcase, Cpu } from 'lucide-react';
 import { Prompt } from '../types';
 import { useState, MouseEvent } from 'react';
+import { analyticsService } from '../services/analyticsService';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -29,6 +30,7 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
     const shareUrl = `${window.location.origin}${window.location.pathname}?id=${prompt.id}`;
     navigator.clipboard.writeText(shareUrl);
     setShared(true);
+    analyticsService.trackShare();
     setTimeout(() => setShared(false), 2000);
   };
 

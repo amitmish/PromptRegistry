@@ -15,16 +15,20 @@ import {
   ChevronRight,
   Heart,
   Menu,
-  X
+  X,
+  LayoutDashboard,
+  ShieldCheck
 } from 'lucide-react';
 import { auth, signInWithGoogle } from './lib/firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { Prompt, Category } from './types';
 import { promptService } from './services/promptService';
+import { analyticsService } from './services/analyticsService';
 import PromptCard from './components/PromptCard';
 import PromptModal from './components/PromptModal';
 import PublishModal from './components/PublishModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
+import AdminDashboard from './components/AdminDashboard';
 
 const CATEGORIES: { label: Category; icon: any }[] = [
   { label: 'Coding', icon: Code },
@@ -41,7 +45,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
-  const [view, setView] = useState<'Feed' | 'MyPrompts' | 'Favorites'>('Feed');
+  const [view, setView] = useState<'Feed' | 'MyPrompts' | 'Favorites' | 'Admin'>('Feed');
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [promptToEdit, setPromptToEdit] = useState<Prompt | null>(null);
   const [promptToDelete, setPromptToDelete] = useState<Prompt | null>(null);
@@ -52,10 +56,18 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (u && !user) {
+        // Track sign in only when transitioning from logged out to logged in
+        analyticsService.trackSignIn();
+      }
       setUser(u);
     });
+    
+    // Track visit on initial mount
+    analyticsService.trackVisit();
+    
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const fetchPrompts = async () => {
     setLoading(true);
@@ -345,20 +357,39 @@ export default function App() {
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
                     view === 'MyPrompts'
                     ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
-                    : 'text-slate-600 hover:bg-slate-100'
+                    : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <PenTool className="w-4 h-4" />
                   <span>My Published</span>
                 </li>
+                {user?.email === 'amitfinkel100@gmail.com' && (
+                  <li 
+                    onClick={() => {
+                      setView('Admin');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
+                      view === 'Admin'
+                      ? 'bg-rose-50 text-rose-700 font-bold shadow-sm' 
+                      : 'text-rose-600 hover:bg-rose-50'
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Admin Panel</span>
+                  </li>
+                )}
               </ul>
             </div>
           </nav>
         </aside>
 
-        {/* Main Feed */}
-        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        {/* Main Content */}
+        {view === 'Admin' ? (
+          <AdminDashboard onBack={() => setView('Feed')} />
+        ) : (
+          <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
             <div>
               <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
                 {view === 'MyPrompts' ? 'My Published' : view === 'Favorites' ? 'My Favorites' : 'Trending Prompts'}
@@ -452,6 +483,7 @@ export default function App() {
             </div>
           )}
         </main>
+      )}
       </div>
 
       {/* Modals */}
