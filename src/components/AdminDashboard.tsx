@@ -82,11 +82,11 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
 
   const statCards = [
     { label: 'Total Visits', value: stats.totalVisits, icon: Eye, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Unique Visitors', value: (stats as any).uniqueVisits || 0, icon: Layers, color: 'text-cyan-600', bg: 'bg-cyan-50' },
     { label: 'Platform Users', value: stats.userCount, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
     { label: 'Total Prompts', value: stats.promptCount, icon: MessageSquare, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { label: 'Total Likes', value: stats.totalLikes, icon: Heart, color: 'text-pink-600', bg: 'bg-pink-50' },
     { label: 'Total Shares', value: stats.totalShares, icon: Share2, color: 'text-violet-600', bg: 'bg-violet-50' },
-    { label: 'Total Sign-ins', value: stats.totalSignIns, icon: LogIn, color: 'text-amber-600', bg: 'bg-amber-50' },
   ];
 
   return (

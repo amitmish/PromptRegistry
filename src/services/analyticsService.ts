@@ -20,18 +20,29 @@ export const analyticsService = {
   async trackVisit() {
     try {
       const statsRef = doc(db, STATS_DOC);
-      await updateDoc(statsRef, {
+      const isUnique = !localStorage.getItem('prompt_registry_visited');
+      
+      const updates: any = {
         totalVisits: increment(1)
-      }).catch(async (err) => {
+      };
+
+      if (isUnique) {
+        updates.uniqueVisits = increment(1);
+        localStorage.setItem('prompt_registry_visited', 'true');
+      }
+
+      await updateDoc(statsRef, updates).catch(async (err) => {
         // If doc doesn't exist, create it
         if (err.code === 'not-found' || err.message?.includes('not-found')) {
           await setDoc(statsRef, {
             totalVisits: 1,
+            uniqueVisits: 1,
             totalShares: 0,
             totalSignIns: 0,
             totalLikes: 0,
             totalPrompts: 0
           });
+          localStorage.setItem('prompt_registry_visited', 'true');
         }
       });
     } catch (error) {
