@@ -65,8 +65,21 @@ export default function App() {
     
     // Track visit on initial mount
     analyticsService.trackVisit();
-    
-    return () => unsubscribe();
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const button = target.closest('button') || target.closest('a');
+      if (button) {
+        const label = button.getAttribute('aria-label') || button.textContent?.trim() || 'unnamed_element';
+        analyticsService.trackClick(label.slice(0, 30));
+      }
+    };
+
+    window.addEventListener('click', handleClick);
+    return () => {
+      unsubscribe();
+      window.removeEventListener('click', handleClick);
+    };
   }, [user]);
 
   const fetchPrompts = async () => {

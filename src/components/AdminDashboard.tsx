@@ -13,7 +13,8 @@ import {
   ArrowUpRight,
   Database,
   Loader2,
-  Trash2
+  Trash2,
+  MousePointer2
 } from 'lucide-react';
 import { analyticsService } from '../services/analyticsService';
 import { promptService } from '../services/promptService';
@@ -24,6 +25,8 @@ interface AdminStats {
   totalSignIns: number;
   totalLikes: number;
   totalPrompts: number;
+  totalClicks: number;
+  clicksByButton?: Record<string, number>;
   userCount: number;
   promptCount: number;
   uniqueVisits?: number;
@@ -164,11 +167,12 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     { label: 'Total Prompts', value: stats.promptCount, icon: MessageSquare, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { label: 'Total Likes', value: stats.totalLikes, icon: Heart, color: 'text-pink-600', bg: 'bg-pink-50' },
     { label: 'Total Shares', value: stats.totalShares, icon: Share2, color: 'text-violet-600', bg: 'bg-violet-50' },
+    { label: 'Total Clicks', value: stats.totalClicks || 0, icon: MousePointer2, color: 'text-amber-600', bg: 'bg-amber-50' },
   ];
 
   return (
-    <div className="flex-1 bg-slate-50 overflow-y-auto p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="flex-1 bg-slate-50 overflow-y-auto p-4 md:p-8 flex flex-col items-center">
+      <div className="max-w-6xl w-full">
         <div className="flex items-center gap-4 mb-8">
           <button 
             onClick={onBack}
@@ -183,7 +187,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
         </div>
 
         {/* Stat Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-10">
           {statCards.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -378,6 +382,50 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                 ))}
                 {stats.prompts.length === 0 && (
                   <div className="p-8 text-center text-slate-400 italic">No prompts published yet</div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Clicks Breakdown */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MousePointer2 className="w-5 h-5 text-amber-600" />
+                <h3 className="font-bold text-slate-800">Most Used Buttons</h3>
+              </div>
+              <span className="text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-1 rounded-full uppercase tracking-wider">
+                Total Clicks: {stats.totalClicks || 0}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto max-h-[400px]">
+              <div className="p-4 space-y-3">
+                {stats.clicksByButton ? (
+                  Object.entries(stats.clicksByButton)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([btn, count]) => {
+                      const percentage = stats.totalClicks ? Math.round((count / stats.totalClicks) * 100) : 0;
+                      return (
+                        <div key={btn} className="space-y-1">
+                          <div className="flex justify-between text-xs font-bold text-slate-700">
+                            <span className="truncate pr-2">{btn}</span>
+                            <span>{count} clicks ({percentage}%)</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percentage}%` }}
+                              className="h-full bg-amber-400"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })
+                ) : (
+                  <div className="py-8 text-center text-slate-400 italic">No click data available yet</div>
+                )}
+                {stats.clicksByButton && Object.keys(stats.clicksByButton).length === 0 && (
+                  <div className="py-8 text-center text-slate-400 italic">No clicks recorded yet</div>
                 )}
               </div>
             </div>

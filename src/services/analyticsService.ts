@@ -15,9 +15,15 @@ import { db, auth } from '../lib/firebase';
 import { handleFirestoreError, OperationType } from '../lib/error-handler';
 
 const STATS_DOC = 'analytics/stats';
+const ADMIN_EMAIL = 'amitfinkel100@gmail.com';
+
+const shouldExclude = () => {
+  return auth.currentUser?.email === ADMIN_EMAIL;
+};
 
 export const analyticsService = {
   async trackVisit() {
+    if (shouldExclude()) return;
     try {
       const statsRef = doc(db, STATS_DOC);
       const isUnique = !localStorage.getItem('prompt_registry_visited');
@@ -40,7 +46,8 @@ export const analyticsService = {
             totalShares: 0,
             totalSignIns: 0,
             totalLikes: 0,
-            totalPrompts: 0
+            totalPrompts: 0,
+            totalClicks: 0
           });
           localStorage.setItem('prompt_registry_visited', 'true');
         }
@@ -51,7 +58,45 @@ export const analyticsService = {
     }
   },
 
+  async trackClick(label?: string) {
+    if (shouldExclude()) return;
+    try {
+      const statsRef = doc(db, STATS_DOC);
+      const updates: any = {
+        totalClicks: increment(1)
+      };
+
+      if (label) {
+        // We use a dot-notation mapping for nested field updates in Firestore
+        // sanitized label to avoid issues with special characters
+        const safeLabel = label.replace(/[$.[\]#/]/g, '_').slice(0, 50);
+        updates[`clicksByButton.${safeLabel}`] = increment(1);
+      }
+
+      await updateDoc(statsRef, updates).catch(async (err) => {
+        if (err.code === 'not-found') {
+          const initialData: any = {
+            totalVisits: 0,
+            totalShares: 0,
+            totalSignIns: 0,
+            totalLikes: 0,
+            totalPrompts: 0,
+            totalClicks: 1
+          };
+          if (label) {
+            const safeLabel = label.replace(/[$.[\]#/]/g, '_').slice(0, 50);
+            initialData.clicksByButton = { [safeLabel]: 1 };
+          }
+          await setDoc(statsRef, initialData);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to track click:', error);
+    }
+  },
+
   async trackShare() {
+    if (shouldExclude()) return;
     try {
       const statsRef = doc(db, STATS_DOC);
       await updateDoc(statsRef, {
@@ -63,7 +108,8 @@ export const analyticsService = {
             totalShares: 1,
             totalSignIns: 0,
             totalLikes: 0,
-            totalPrompts: 0
+            totalPrompts: 0,
+            totalClicks: 0
           });
         }
       });
@@ -73,6 +119,7 @@ export const analyticsService = {
   },
 
   async trackSignIn() {
+    if (shouldExclude()) return;
     try {
       const statsRef = doc(db, STATS_DOC);
       await updateDoc(statsRef, {
@@ -84,7 +131,8 @@ export const analyticsService = {
             totalShares: 0,
             totalSignIns: 1,
             totalLikes: 0,
-            totalPrompts: 0
+            totalPrompts: 0,
+            totalClicks: 0
           });
         }
       });
@@ -94,6 +142,7 @@ export const analyticsService = {
   },
 
   async trackLike(isIncrement: boolean = true) {
+    if (shouldExclude()) return;
     try {
       const statsRef = doc(db, STATS_DOC);
       await updateDoc(statsRef, {
@@ -105,7 +154,8 @@ export const analyticsService = {
             totalShares: 0,
             totalSignIns: 0,
             totalLikes: isIncrement ? 1 : 0,
-            totalPrompts: 0
+            totalPrompts: 0,
+            totalClicks: 0
           });
         }
       });
@@ -115,6 +165,7 @@ export const analyticsService = {
   },
 
   async trackPromptCreated() {
+    if (shouldExclude()) return;
     try {
       const statsRef = doc(db, STATS_DOC);
       await updateDoc(statsRef, {
@@ -126,7 +177,8 @@ export const analyticsService = {
             totalShares: 0,
             totalSignIns: 0,
             totalLikes: 0,
-            totalPrompts: 1
+            totalPrompts: 1,
+            totalClicks: 0
           });
         }
       });
@@ -136,7 +188,7 @@ export const analyticsService = {
   },
 
   async getAdminStats() {
-    if (auth.currentUser?.email !== 'amitfinkel100@gmail.com') {
+    if (auth.currentUser?.email !== ADMIN_EMAIL) {
       throw new Error('Unauthorized');
     }
 
@@ -147,7 +199,8 @@ export const analyticsService = {
         totalShares: 0,
         totalSignIns: 0,
         totalLikes: 0,
-        totalPrompts: 0
+        totalPrompts: 0,
+        totalClicks: 0
       };
 
       // Also get user count (limited for performance)
