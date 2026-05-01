@@ -402,9 +402,9 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
               <div className="p-4 space-y-3">
                 {stats.clicksByButton ? (
                   Object.entries(stats.clicksByButton)
-                    .sort(([, a], [, b]) => b - a)
+                    .sort((a, b) => (b[1] as number) - (a[1] as number))
                     .map(([btn, count]) => {
-                      const percentage = stats.totalClicks ? Math.round((count / stats.totalClicks) * 100) : 0;
+                      const percentage = stats.totalClicks ? Math.round(((count as number) / stats.totalClicks) * 100) : 0;
                       return (
                         <div key={btn} className="space-y-1">
                           <div className="flex justify-between text-xs font-bold text-slate-700">

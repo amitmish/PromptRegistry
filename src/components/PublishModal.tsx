@@ -351,6 +351,7 @@ export default function PublishModal({ isOpen, onClose, onPublish, initialData }
                   type="button"
                   onClick={onClose}
                   className="flex-1 px-6 py-3 bg-slate-50 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-100 transition-colors"
+                  data-track="Cancel Publish"
                 >
                   Cancel
                 </button>
@@ -358,6 +359,7 @@ export default function PublishModal({ isOpen, onClose, onPublish, initialData }
                   type="submit"
                   disabled={isSubmitting}
                   className="flex-[2] px-6 py-3 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 shadow-md"
+                  data-track={initialData ? "Submit Update Prompt" : "Submit Publish Prompt"}
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

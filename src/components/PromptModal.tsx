@@ -62,6 +62,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
               <button 
                 onClick={onClose}
                 className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"
+                data-track="Close Prompt Modal Top"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -140,6 +141,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
                   <button 
                     onClick={handleCopy}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-600 shadow-md rounded-lg text-xs font-bold text-white hover:bg-blue-700 transition-all transform active:scale-95"
+                    data-track="Copy Prompt Modal"
                   >
                     {copied ? (
                       <>
@@ -167,6 +169,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
               <button 
                 onClick={onClose}
                 className="px-6 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-900 transition-colors"
+                data-track="Close Prompt Modal Bottom"
               >
                 Close View
               </button>

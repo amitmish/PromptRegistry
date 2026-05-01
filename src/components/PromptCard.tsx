@@ -98,6 +98,7 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
               onClick={handleEdit}
               className="p-1.5 bg-white shadow-sm hover:bg-slate-50 rounded-lg text-blue-600 transition-colors relative z-10 border border-slate-100"
               title="Edit Prompt"
+              data-track="Edit Prompt Card"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -105,6 +106,7 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
               onClick={handleDelete}
               className="p-1.5 bg-white shadow-sm hover:bg-rose-50 rounded-lg text-rose-500 transition-colors relative z-10 border border-slate-100"
               title="Delete Prompt"
+              data-track="Delete Prompt Card"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -153,6 +155,7 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
               onClick={handleShare}
               className="text-slate-400 hover:text-blue-600 transition-colors"
               title="Share direct link"
+              data-track="Share Prompt Card"
             >
               {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
             </button>
@@ -161,6 +164,7 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
               className={`flex items-center gap-1 transition-colors px-1 ${
                 userId && prompt.likes?.includes(userId) ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
               }`}
+              data-track="Like Prompt Card"
             >
               <Heart className={`w-3.5 h-3.5 ${userId && prompt.likes?.includes(userId) ? 'fill-current' : ''}`} />
               <span className="text-[11px] font-bold">{prompt.likesCount || 0}</span>
@@ -168,6 +172,7 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
             <button 
               onClick={handleCopy}
               className="text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:text-blue-700 transition-colors bg-blue-50 px-2 py-1 rounded-lg"
+              data-track="Copy Prompt Card"
             >
               {copied ? 'Copied!' : 'Copy'}
             </button>

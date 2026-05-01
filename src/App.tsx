@@ -17,7 +17,8 @@ import {
   Menu,
   X,
   LayoutDashboard,
-  ShieldCheck
+  ShieldCheck,
+  Info
 } from 'lucide-react';
 import { auth, signInWithGoogle } from './lib/firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
@@ -29,6 +30,7 @@ import PromptModal from './components/PromptModal';
 import PublishModal from './components/PublishModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import AdminDashboard from './components/AdminDashboard';
+import { AboutModal } from './components/AboutModal';
 
 const CATEGORIES: { label: Category; icon: any }[] = [
   { label: 'Coding', icon: Code },
@@ -52,9 +54,17 @@ export default function App() {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    // Check if user has seen the about modal
+    const hasSeenAbout = localStorage.getItem('prompt_registry_about_seen');
+    if (!hasSeenAbout) {
+      setIsAboutModalOpen(true);
+      localStorage.setItem('prompt_registry_about_seen', 'true');
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       if (u && !user) {
         // Track sign in only when transitioning from logged out to logged in
@@ -70,8 +80,22 @@ export default function App() {
       const target = e.target as HTMLElement;
       const button = target.closest('button') || target.closest('a');
       if (button) {
-        const label = button.getAttribute('aria-label') || button.textContent?.trim() || 'unnamed_element';
-        analyticsService.trackClick(label.slice(0, 30));
+        // Priority: data-track > aria-label > title > textContent > id > 'unnamed_element'
+        const label = button.getAttribute('data-track') || 
+                      button.getAttribute('aria-label') || 
+                      button.getAttribute('title') || 
+                      button.textContent?.trim() || 
+                      button.id || 
+                      'unnamed_element';
+                      
+        // Clean up label: remove extra whitespace, symbols, and limit length
+        const cleanLabel = label
+          .replace(/\s+/g, ' ')
+          .replace(/[^\w\s-]/gi, '')
+          .trim()
+          .slice(0, 30);
+          
+        analyticsService.trackClick(cleanLabel || 'unnamed_element');
       }
     };
 
@@ -242,6 +266,13 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4 shrink-0 pl-4">
+          <button 
+            onClick={() => setIsAboutModalOpen(true)}
+            className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label="About"
+          >
+            <Info className="w-5 h-5" />
+          </button>
           {user ? (
             <>
               <button 
@@ -518,6 +549,11 @@ export default function App() {
         onClose={() => { setIsDeleteModalOpen(false); setPromptToDelete(null); }}
         onConfirm={confirmDelete}
         title={promptToDelete?.title || ''}
+      />
+
+      <AboutModal 
+        isOpen={isAboutModalOpen}
+        onClose={() => setIsAboutModalOpen(false)}
       />
       
       {/* Mobile FAB */}
