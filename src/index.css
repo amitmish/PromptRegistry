@@ -3,4 +3,8 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  @keyframes progress {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
 }

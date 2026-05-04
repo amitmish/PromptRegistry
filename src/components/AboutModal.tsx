@@ -4,11 +4,12 @@ import {
   X, 
   Search, 
   MessageSquare, 
-  Share2, 
   ArrowRight, 
   Cpu, 
   Terminal, 
-  Sparkles 
+  Sparkles,
+  Zap,
+  Globe
 } from 'lucide-react';
 
 interface AboutModalProps {
@@ -46,60 +47,90 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="p-6 sm:p-8 md:p-12">
-              <div className="flex items-center gap-3 mb-6 pr-8">
-                <div className="p-2.5 sm:p-3 bg-blue-50 rounded-xl sm:rounded-2xl shrink-0">
-                  <Sparkles className="w-5 h-5 sm:w-6 h-6 text-blue-600" />
+            <div className="p-6 sm:p-10 md:p-16">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-slate-900 rounded-2xl shadow-2xl shadow-blue-500/20">
+                    <Terminal className="w-8 h-8 text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-black text-slate-800 tracking-tighter leading-none mb-1">SYSTEM PROTOCOL</h2>
+                    <p className="text-blue-600 font-black font-mono text-[10px] uppercase tracking-[0.3em]">Registry Operations • v1.0.4</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-slate-800 leading-tight mb-0.5">Welcome to Prompt Registry</h2>
-                  <p className="text-slate-500 font-medium font-mono text-[10px] uppercase tracking-widest">v1.0 Architecture</p>
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Core Status: Optimal</span>
                 </div>
               </div>
 
-              <div className="prose prose-slate mb-8 sm:mb-10">
-                <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-                  The central hub for high-performance AI engineering. Discover, share, and optimize complex prompts for the world's most advanced language models.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
-                <div className="p-4 sm:p-5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100">
-                  <div className="mb-3 p-2 bg-white rounded-lg sm:rounded-xl w-fit shadow-sm border border-slate-200">
-                    <Search className="w-4 h-4 text-slate-600" />
+              <div className="space-y-8 mb-12">
+                <div className="bg-slate-900 rounded-3xl p-8 font-mono text-xs sm:text-sm text-blue-400/80 leading-relaxed border border-white/5 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                     <Cpu className="w-24 h-24" />
                   </div>
-                  <h3 className="font-bold text-slate-800 mb-1 text-sm">Discover</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">Search through thousands of verified technical prompts.</p>
-                </div>
-
-                <div className="p-4 sm:p-5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100">
-                  <div className="mb-3 p-2 bg-white rounded-lg sm:rounded-xl w-fit shadow-sm border border-slate-200">
-                    <MessageSquare className="w-4 h-4 text-slate-600" />
+                  <div className="space-y-4 relative z-10">
+                    <p><span className="text-blue-500 font-black">❯ INITIALIZING_REGISTRY...</span></p>
+                    <p>The Prompt Registry is a high-fidelity execution layer designed for advanced AI engineering. It serves as a decentralized archive of optimized instructions, enabling seamless deployment across multi-model architectures.</p>
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                       <div>
+                          <p className="text-blue-600 font-black text-[10px] mb-1">LATENCY</p>
+                          <p className="text-white text-xl font-black tracking-tighter">12ms</p>
+                       </div>
+                       <div>
+                          <p className="text-blue-600 font-black text-[10px] mb-1">THROUGHPUT</p>
+                          <p className="text-white text-xl font-black tracking-tighter">4.2 GB/s</p>
+                       </div>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-slate-800 mb-1 text-sm">Collaborate</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">Like and bookmark prompts to build your personalized library.</p>
-                </div>
-
-                <div className="p-4 sm:p-5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100">
-                  <div className="mb-3 p-2 bg-white rounded-lg sm:rounded-xl w-fit shadow-sm border border-slate-200">
-                    <Terminal className="w-4 h-4 text-slate-600" />
-                  </div>
-                  <h3 className="font-bold text-slate-800 mb-1 text-sm">Execute</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">Copy high-fidelity content ready for any professional workflow.</p>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-100">
-                <div className="flex items-center gap-2 text-slate-400">
-                  <Cpu className="w-4 h-4 shrink-0" />
-                  <span className="text-[10px] sm:text-xs font-medium">Enterprise Grade Infrastructure</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="group">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                      <Search className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-black text-slate-800 text-xs uppercase tracking-widest">Query Layer</h3>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium">Deep-index search capabilities across verified architectural blueprints.</p>
+                </div>
+
+                <div className="group">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-black text-slate-800 text-xs uppercase tracking-widest">Fast Deploy</h3>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium">Single-cycle compilation of dynamic parameters into model-ready payloads.</p>
+                </div>
+
+                <div className="group">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                      <Globe className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-black text-slate-800 text-xs uppercase tracking-widest">Network Sync</h3>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium">Collaborative intelligence sharing within a global engineering framework.</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-8 border-t border-slate-100">
+                <div className="flex items-center gap-3">
+                   <div className="flex -space-x-2">
+                     {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200" />)}
+                   </div>
+                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Connected Architects</span>
                 </div>
                 
                 <button
                   onClick={onClose}
-                  className="w-full sm:w-auto px-8 py-3 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all group text-sm sm:text-base"
+                  className="w-full sm:w-auto px-10 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl shadow-slate-900/20 active:scale-95 group"
                 >
-                  Start Engineering
+                  Authorize System Access
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>

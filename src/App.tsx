@@ -18,7 +18,8 @@ import {
   X,
   LayoutDashboard,
   ShieldCheck,
-  Info
+  Info,
+  Terminal
 } from 'lucide-react';
 import { auth, signInWithGoogle } from './lib/firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
@@ -234,307 +235,323 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-      {/* Header Navigation */}
-      <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0 sticky top-0 z-40">
-        <div className="flex items-center gap-3 shrink-0">
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 -ml-2 text-slate-500 hover:text-slate-900 transition-colors"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center shadow-sm">
-              <Sparkles className="w-5 h-5 text-white fill-current" />
+    <div className="flex h-screen bg-white overflow-hidden text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
+      {/* Sidebar Architecture */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-50 border-r border-slate-200 transform transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+        <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => { setView('Feed'); setSelectedCategory('All'); setIsMobileMenuOpen(false); }}>
+              <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+                <Terminal className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="font-black text-xl tracking-tighter leading-none text-slate-800">REGISTRY</h1>
+                <p className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] mt-1.5 opacity-80 group-hover:opacity-100 transition-opacity">v1.0.4 • Alpha</p>
+              </div>
             </div>
-            <span className="font-bold text-xl tracking-tight text-slate-800">PromptRegistry</span>
-          </div>
-        </div>
 
-        <div className="hidden md:flex flex-1 max-w-xl mx-8">
-          <form onSubmit={handleSearch} className="relative w-full">
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for professional prompts (e.g., 'React Refactor')" 
-              className="w-full pl-10 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-inner"
-            />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          </form>
-        </div>
-
-        <div className="flex items-center gap-4 shrink-0 pl-4">
-          <button 
-            onClick={() => setIsAboutModalOpen(true)}
-            className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
-            aria-label="About"
-          >
-            <Info className="w-5 h-5" />
-          </button>
-          {user ? (
-            <>
+            <nav className="space-y-1">
+              <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4 ml-3">System Archives</div>
               <button 
-                onClick={() => setIsPublishModalOpen(true)}
-                className="hidden sm:block px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm active:scale-95"
+                onClick={() => { setView('Feed'); setSelectedCategory('All'); setIsMobileMenuOpen(false); }}
+                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all group ${
+                  view === 'Feed' && selectedCategory === 'All' ? 'bg-white shadow-xl shadow-blue-500/5 border border-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-100'
+                }`}
               >
-                Publish Prompt
+                <div className="flex items-center gap-3">
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span className="text-xs font-black uppercase tracking-widest">Main Registry</span>
+                </div>
+                {view === 'Feed' && selectedCategory === 'All' && <div className="w-1.5 h-1.5 rounded-full bg-blue-600 shadow-lg shadow-blue-500" />}
               </button>
-              <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-                <img src={user.photoURL || ''} className="w-9 h-9 rounded-full border border-slate-200 object-cover" alt="" />
-                <button onClick={() => signOut(auth)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                  <LogOut className="w-5 h-5" />
-                </button>
-              </div>
-            </>
-          ) : (
-            <button 
-              onClick={signInWithGoogle}
-              className="px-5 py-2 bg-slate-800 text-white text-sm font-semibold rounded-lg hover:bg-slate-900 transition-all flex items-center gap-2 active:scale-95"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In</span>
-            </button>
-          )}
-        </div>
-      </header>
 
-      <div className="flex-1 flex overflow-hidden w-full relative">
-        {/* Mobile Sidebar Overlay */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 md:hidden"
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Sidebar */}
-        <aside className={`
-          fixed md:static inset-y-0 left-0 z-40 w-72 md:w-64 bg-white md:bg-transparent border-r border-slate-200 p-6 shrink-0 overflow-y-auto transition-transform duration-300 ease-in-out transform
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        `}>
-          <nav className="space-y-8">
-            <div>
-              <div className="flex items-center justify-between md:block mb-4">
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Categories</h3>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-slate-400">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <ul className="space-y-1">
-                <li 
-                  onClick={() => {
-                    setView('Feed');
-                    setSelectedCategory('All');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg font-medium text-sm cursor-pointer transition-all ${
-                    view === 'Feed' && selectedCategory === 'All' 
-                    ? 'bg-blue-50 text-blue-700 shadow-sm' 
-                    : 'text-slate-600 hover:bg-slate-100'
+              {CATEGORIES.map(({ label, icon: Icon }) => (
+                <button 
+                  key={label}
+                  onClick={() => { setView('Feed'); setSelectedCategory(label); setIsMobileMenuOpen(false); }}
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all group ${
+                    view === 'Feed' && selectedCategory === label ? 'bg-white shadow-xl shadow-blue-500/5 border border-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <TrendingUp className="w-4 h-4" />
-                    <span>All Prompts</span>
+                    <Icon className="w-4 h-4" />
+                    <span className="text-xs font-black uppercase tracking-widest">{label}</span>
                   </div>
-                </li>
-                {CATEGORIES.map((cat) => (
-                  <li 
-                    key={cat.label}
-                    onClick={() => {
-                      setView('Feed');
-                      setSelectedCategory(cat.label);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
-                      view === 'Feed' && selectedCategory === cat.label 
-                      ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <cat.icon className="w-4 h-4" />
-                      <span>{cat.label}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  {view === 'Feed' && selectedCategory === label && <div className="w-1.5 h-1.5 rounded-full bg-blue-600 shadow-lg shadow-blue-500" />}
+                </button>
+              ))}
+            </nav>
 
-            <div>
-              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Workspace</h3>
-              <ul className="space-y-1">
-                <li 
-                  onClick={() => {
-                    if (user) {
-                      setView('Favorites');
-                      setIsMobileMenuOpen(false);
-                    } else {
-                      signInWithGoogle();
-                    }
-                  }}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
-                    view === 'Favorites'
-                    ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
-                    : 'text-slate-600 hover:bg-slate-100'
+            <div className="mt-12">
+              <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4 ml-3">Personal Core</div>
+              <div className="space-y-1">
+                <button 
+                  onClick={() => { if (user) setView('Favorites'); else signInWithGoogle(); setIsMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${
+                    view === 'Favorites' ? 'bg-white shadow-sm border border-slate-100 text-rose-500' : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
                   <Heart className={`w-4 h-4 ${view === 'Favorites' ? 'fill-current' : ''}`} />
-                  <span>Favorites</span>
-                </li>
-                <li 
-                  onClick={() => {
-                    if (user) {
-                      setView('MyPrompts');
-                      setIsMobileMenuOpen(false);
-                    } else {
-                      signInWithGoogle();
-                    }
-                  }}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
-                    view === 'MyPrompts'
-                    ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' 
-                    : 'text-slate-600 hover:bg-slate-50'
+                  <span className="text-xs font-black uppercase tracking-widest">Bookmarks</span>
+                </button>
+                <button 
+                  onClick={() => { if (user) setView('MyPrompts'); else signInWithGoogle(); setIsMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${
+                    view === 'MyPrompts' ? 'bg-white shadow-sm border border-slate-100 text-blue-600' : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
                   <PenTool className="w-4 h-4" />
-                  <span>My Published</span>
-                </li>
+                  <span className="text-xs font-black uppercase tracking-widest">My Blueprints</span>
+                </button>
+                
                 {user?.email === 'amitfinkel100@gmail.com' && (
-                  <li 
-                    onClick={() => {
-                      setView('Admin');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all ${
-                      view === 'Admin'
-                      ? 'bg-rose-50 text-rose-700 font-bold shadow-sm' 
-                      : 'text-rose-600 hover:bg-rose-50'
-                    }`}
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Admin Panel</span>
-                  </li>
+                  <div className="pt-4 mt-4 border-t border-slate-200/60">
+                    <button 
+                      onClick={() => { setView('Admin'); setIsMobileMenuOpen(false); }}
+                      className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all group overflow-hidden relative ${
+                        view === 'Admin' ? 'bg-slate-900 text-white shadow-2xl' : 'bg-slate-100 text-slate-900 hover:bg-slate-900 hover:text-white'
+                      }`}
+                    >
+                      <div className="relative z-10 flex items-center gap-3">
+                        <ShieldCheck className={`w-4 h-4 ${view === 'Admin' ? 'text-blue-400' : 'text-slate-400'}`} />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Command Console</span>
+                      </div>
+                      <div className="relative z-10 flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${view === 'Admin' ? 'bg-blue-400 shadow-[0_0_8px_#60a5fa]' : 'bg-emerald-500'}`} />
+                      </div>
+                      {view === 'Admin' && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-transparent" />
+                      )}
+                    </button>
+                  </div>
                 )}
-              </ul>
-            </div>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        {view === 'Admin' ? (
-          <AdminDashboard onBack={() => setView('Feed')} />
-        ) : (
-          <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
-                {view === 'MyPrompts' ? 'My Published' : view === 'Favorites' ? 'My Favorites' : 'Trending Prompts'}
-              </h1>
-              <p className="text-sm text-slate-500 mt-1">Discover, copy, and share high-quality AI instructions.</p>
-            </div>
-            <div className="flex gap-2">
-              <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:border-slate-300 transition-colors shadow-sm cursor-default">
-                Most Popular
-              </button>
-              <button 
-                onClick={() => { setSelectedCategory('All'); setSearchQuery(''); fetchPrompts(); }}
-                className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
-              >
-                Clear Filters
-              </button>
+              </div>
             </div>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-              {[1, 2, 4, 5, 6, 7].map(i => (
-                <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 h-56 animate-pulse shadow-sm">
-                  <div className="flex justify-between mb-4">
-                    <div className="h-6 w-16 bg-slate-50 rounded"></div>
-                    <div className="h-6 w-16 bg-slate-50 rounded"></div>
-                  </div>
-                  <div className="h-8 w-3/4 bg-slate-50 rounded mb-4"></div>
-                  <div className="h-16 w-full bg-slate-50 rounded"></div>
+          <div className="mt-auto p-6 border-t border-slate-100 bg-white/50">
+            {user ? (
+              <div className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100">
+                <div className="relative">
+                  <img src={user.photoURL!} className="w-10 h-10 rounded-xl shadow-sm border border-slate-200" alt="" />
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
                 </div>
-              ))}
-            </div>
-          ) : prompts.length === 0 ? (
-            <div className="text-center py-24 bg-white border border-slate-200 rounded-2xl shadow-sm">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Search className="w-8 h-8 text-slate-300" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">No matching prompts</h3>
-              <p className="text-slate-500 max-w-sm mx-auto mb-8">
-                Try searching for something else or browse different categories to find inspiration.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
-              <AnimatePresence mode="popLayout">
-                {prompts.map((prompt) => (
-                  <motion.div
-                    key={prompt.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-black text-slate-800 truncate leading-none mb-1">{user.displayName?.split(' ')[0]}</p>
+                  <button 
+                    onClick={() => signOut(auth)} 
+                    className="text-[9px] font-black text-rose-500 uppercase tracking-widest hover:text-rose-600 transition-colors"
                   >
-                    <PromptCard 
-                      prompt={prompt} 
-                      onLike={handleLike}
-                      onClick={handlePromptClick}
-                      onEdit={handleEditClick}
-                      onDelete={handleDeletePrompt}
-                      isAuthor={user?.uid === prompt.authorId}
-                      userId={user?.uid}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-          
-          {!loading && prompts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                {view === 'Favorites' ? <Heart className="w-8 h-8 text-slate-300" /> : <PenTool className="w-8 h-8 text-slate-300" />}
+                    Disconnect
+                  </button>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-slate-800">
-                {view === 'Favorites' ? 'No favorites yet' : 'No prompts published'}
-              </h3>
-              <p className="text-slate-500 mt-2 max-w-xs mx-auto">
-                {view === 'Favorites' 
-                  ? 'Start exploring and heart your favorite prompts to see them here!' 
-                  : 'Share your first professional prompt with the world!'}
-              </p>
-              {view === 'MyPrompts' && (
-                <button 
-                  onClick={() => setIsPublishModalOpen(true)}
-                  className="mt-6 px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
-                >
-                  Publish Your First Prompt
-                </button>
-              )}
-            </div>
-          )}
-        </main>
-      )}
-      </div>
+            ) : (
+              <button 
+                onClick={signInWithGoogle}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98]"
+              >
+                Sync Device
+              </button>
+            )}
+          </div>
+        </div>
+      </aside>
 
-      {/* Modals */}
+      {/* Main Execution Hub */}
+      <main className="flex-1 flex flex-col h-full bg-white relative overflow-hidden">
+        {/* Universal Header */}
+        <header className="h-20 border-b border-slate-100 flex items-center px-6 md:px-12 gap-8 bg-white/80 backdrop-blur-xl z-30 sticky top-0">
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="lg:hidden p-2 text-slate-400 hover:text-slate-900"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+
+          <div className="relative flex-1 group">
+            <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
+            <form onSubmit={handleSearch}>
+              <input 
+                type="text"
+                placeholder="Query specialized architecture archives..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-4 py-3 bg-transparent text-sm font-black text-slate-800 outline-none placeholder:text-slate-300 placeholder:uppercase placeholder:tracking-widest"
+              />
+            </form>
+          </div>
+
+          <div className="flex items-center gap-4">
+             <button 
+               onClick={() => setIsAboutModalOpen(true)}
+               className="p-3 bg-slate-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all"
+             >
+               <Info className="w-5 h-5" />
+             </button>
+             {user && (
+               <button 
+                 onClick={() => setIsPublishModalOpen(true)}
+                 className="hidden md:flex px-8 py-3 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95 items-center gap-2"
+               >
+                 <Plus className="w-4 h-4" />
+                 Register Blueprint
+               </button>
+             )}
+          </div>
+        </header>
+
+        {/* Scrollable View Layer */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-12 bg-slate-100/30">
+          <div className="max-w-7xl mx-auto space-y-16">
+            
+            {view === 'Admin' ? (
+              <AdminDashboard onBack={() => setView('Feed')} />
+            ) : (
+              <>
+                {/* Bento Hero (Featured) */}
+                {prompts.length > 0 && searchQuery === '' && selectedCategory === 'All' && view === 'Feed' && !loading && (
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                     <div 
+                      className="md:col-span-8 group relative aspect-[21/9] md:aspect-auto md:h-[400px] bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl flex items-center p-8 md:p-16 border border-white/10 cursor-pointer" 
+                      onClick={() => handlePromptClick(prompts[0])}
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/50 via-slate-900 to-slate-900" />
+                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent" />
+                        
+                        <div className="relative z-10 max-w-lg">
+                           <div className="flex items-center gap-2 mb-6">
+                              <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+                              <span className="px-3 py-1 bg-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-lg backdrop-blur-md">Featured Architecture</span>
+                           </div>
+                           <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-4 leading-[0.95]">{prompts[0].title}</h2>
+                           <p className="text-slate-400 text-base md:text-lg mb-10 line-clamp-2 italic font-medium opacity-80">"{prompts[0].description}"</p>
+                           <div className="flex items-center gap-4">
+                              <button className="px-8 py-3.5 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2 shadow-xl shadow-blue-500/30">
+                                 Open Blueprint <ChevronRight className="w-4 h-4" />
+                              </button>
+                           </div>
+                        </div>
+
+                        {prompts[0].resultImage && (
+                          <div className="hidden lg:block absolute right-[-5%] top-[-5%] bottom-[-5%] w-1/2 overflow-hidden opacity-30 group-hover:opacity-50 transition-all duration-1000 rotate-3 group-hover:rotate-0">
+                             <img src={prompts[0].resultImage} className="h-full w-full object-cover scale-110 group-hover:scale-100 transition-transform duration-[2000ms]" alt="" referrerPolicy="no-referrer" />
+                          </div>
+                        )}
+                     </div>
+
+                     <div className="md:col-span-4 bg-white rounded-[2.5rem] p-10 flex flex-col justify-center border-2 border-blue-50 shadow-xl shadow-blue-500/5 relative overflow-hidden group">
+                        <div className="absolute -top-12 -right-12 p-8 opacity-5 scale-150 rotate-12 group-hover:rotate-0 transition-transform duration-1000">
+                           <Sparkles className="w-48 h-48 text-blue-600" />
+                        </div>
+                        <h3 className="text-2xl font-black tracking-tighter leading-none text-slate-800 mb-6">Engineering Status</h3>
+                        <div className="space-y-6 mb-10">
+                           <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Records</span>
+                              <span className="text-sm font-black text-blue-600">{prompts.length} UNITS</span>
+                           </div>
+                           <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Load</span>
+                              <span className="text-sm font-black text-emerald-500">STABLE</span>
+                           </div>
+                           <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Deployments</span>
+                              <span className="text-sm font-black text-slate-800">12.4K</span>
+                           </div>
+                        </div>
+                        <button 
+                          onClick={() => setIsAboutModalOpen(true)}
+                          className="w-full py-4 bg-slate-50 text-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-200"
+                        >
+                          Protocol Overview
+                        </button>
+                     </div>
+                  </div>
+                )}
+
+                {/* Grid Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-1 h-10 bg-blue-600 rounded-full" />
+                    <div>
+                      <h2 className="text-3xl font-black text-slate-800 tracking-tighter">
+                        {view === 'MyPrompts' ? 'AUTHOR ARCHIVES' : view === 'Favorites' ? 'SAVED BLUEPRINTS' : 'GLOBAL REGISTRY'}
+                      </h2>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">
+                        {loading ? 'Initializing Interface...' : `Buffer Status: ${prompts.length} Clusters Loaded`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Grid Area */}
+                {loading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                      <div key={i} className="bg-white border border-slate-100 rounded-[2rem] p-8 h-72 animate-pulse" />
+                    ))}
+                  </div>
+                ) : prompts.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <AnimatePresence mode="popLayout">
+                      {prompts.map((prompt) => (
+                        <motion.div
+                          key={prompt.id}
+                          layout
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                        >
+                          <PromptCard 
+                            prompt={prompt} 
+                            onLike={handleLike}
+                            onClick={handlePromptClick}
+                            onEdit={handleEditClick}
+                            onDelete={handleDeletePrompt}
+                            isAuthor={user?.uid === prompt.authorId}
+                            userId={user?.uid}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <div className="py-40 text-center bg-white border border-dashed border-slate-200 rounded-[3rem]">
+                    <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8">
+                      {view === 'Favorites' ? <Heart className="w-8 h-8 text-slate-200" /> : <Terminal className="w-8 h-8 text-slate-200" />}
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-3">No matching records detected</h3>
+                    <p className="text-slate-400 text-base max-w-sm mx-auto mb-10 font-medium italic opacity-70">"The current query space is empty. Try refining your selection parameters or synchronize new data."</p>
+                    {(view !== 'Feed' || selectedCategory !== 'All' || searchQuery !== '') && (
+                      <button 
+                        onClick={() => { setView('Feed'); setSelectedCategory('All'); setSearchQuery(''); }}
+                        className="px-10 py-3.5 bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
+                      >
+                        Reset System View
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Action Button */}
+        {user && (
+          <button 
+            onClick={() => setIsPublishModalOpen(true)}
+            className="md:hidden fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-2xl flex items-center justify-center z-40 active:scale-95 transition-all border-4 border-white"
+          >
+            <Plus className="w-8 h-8" />
+          </button>
+        )}
+      </main>
+
       <PromptModal 
+        prompt={selectedPrompt} 
         isOpen={isPromptModalOpen} 
         onClose={() => setIsPromptModalOpen(false)} 
-        prompt={selectedPrompt} 
       />
       
       <PublishModal 
@@ -555,16 +572,6 @@ export default function App() {
         isOpen={isAboutModalOpen}
         onClose={() => setIsAboutModalOpen(false)}
       />
-      
-      {/* Mobile FAB */}
-      {user && (
-        <button 
-          onClick={() => setIsPublishModalOpen(true)}
-          className="fixed bottom-8 right-8 sm:hidden w-16 h-16 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-all z-40 border-4 border-white"
-        >
-          <Plus className="w-8 h-8" />
-        </button>
-      )}
     </div>
   );
 }

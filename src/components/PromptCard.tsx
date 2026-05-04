@@ -1,5 +1,21 @@
 import { motion } from 'motion/react';
-import { Heart, Share2, Copy, Check, TrendingUp, Pencil, Trash2, Database, PenTool, Palette, Image as ImageIcon, Briefcase, Cpu } from 'lucide-react';
+import { 
+  Heart, 
+  Share2, 
+  Copy, 
+  Check, 
+  Pencil, 
+  Trash2, 
+  Database, 
+  PenTool, 
+  Palette, 
+  Image as ImageIcon, 
+  Briefcase, 
+  Cpu,
+  Terminal,
+  Layers,
+  Sparkles
+} from 'lucide-react';
 import { Prompt } from '../types';
 import { useState, MouseEvent } from 'react';
 import { analyticsService } from '../services/analyticsService';
@@ -46,139 +62,157 @@ export default function PromptCard({ prompt, onLike, onClick, onEdit, onDelete, 
 
   const getCategoryStyles = (category: string) => {
     switch (category) {
-      case 'Coding': return 'bg-emerald-100 text-emerald-700';
-      case 'Writing': return 'bg-blue-100 text-blue-700';
-      case 'Creative': return 'bg-purple-100 text-purple-700';
-      case 'Images': return 'bg-pink-100 text-pink-700';
-      case 'Business': return 'bg-amber-100 text-amber-700';
-      default: return 'bg-slate-100 text-slate-700';
+      case 'Coding': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'Writing': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+      case 'Images': return 'bg-purple-50 text-purple-600 border-purple-100';
+      case 'Business': return 'bg-amber-50 text-amber-600 border-amber-100';
+      default: return 'bg-slate-50 text-slate-600 border-slate-100';
     }
   };
 
   const renderCategoryIcon = (category: string) => {
-    const className = "w-10 h-10 opacity-30";
+    const className = "w-4 h-4";
     switch (category) {
-      case 'Coding': return <Database className={className} />;
+      case 'Coding': return <Terminal className={className} />;
       case 'Writing': return <PenTool className={className} />;
       case 'Creative': return <Palette className={className} />;
       case 'Images': return <ImageIcon className={className} />;
       case 'Business': return <Briefcase className={className} />;
-      default: return <PenTool className={className} />;
+      default: return <Sparkles className={className} />;
     }
   };
 
+  // Detect variables
+  const variables = prompt.content.match(/\{\{([^}]+)\}\}/g) || [];
+
   return (
-    <div
-      className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col h-full hover:border-slate-300"
+    <motion.div
+      layout
+      whileHover={{ y: -4 }}
+      className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all cursor-pointer group flex flex-col h-full hover:border-blue-400/30"
       onClick={() => onClick(prompt)}
       id={`prompt-card-${prompt.id}`}
     >
-      <div className="relative h-40 bg-slate-50 overflow-hidden border-b border-slate-100 flex items-center justify-center">
+      {/* Visual Header */}
+      <div className="relative h-44 bg-slate-50 overflow-hidden border-b border-slate-100">
         {prompt.resultImage ? (
-          <img 
-            src={prompt.resultImage} 
-            alt={prompt.title} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            referrerPolicy="no-referrer"
-          />
+          <>
+            <img 
+              src={prompt.resultImage} 
+              alt={prompt.title} 
+              className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+          </>
         ) : (
-          <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 w-full h-full group-hover:bg-slate-100 transition-colors">
-            {renderCategoryIcon(prompt.category)}
-            <p className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{prompt.category} Prompt</p>
-          </div>
-        )}
-        <div className="absolute top-3 left-3 flex gap-2">
-          <span className={`px-2 py-1 text-[10px] font-bold rounded-lg shadow-sm backdrop-blur-md uppercase tracking-wider ${getCategoryStyles(prompt.category)}`}>
-            {prompt.category}
-          </span>
-        </div>
-        {isAuthor && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button 
-              onClick={handleEdit}
-              className="p-1.5 bg-white shadow-sm hover:bg-slate-50 rounded-lg text-blue-600 transition-colors relative z-10 border border-slate-100"
-              title="Edit Prompt"
-              data-track="Edit Prompt Card"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
-            <button 
-              onClick={handleDelete}
-              className="p-1.5 bg-white shadow-sm hover:bg-rose-50 rounded-lg text-rose-500 transition-colors relative z-10 border border-slate-100"
-              title="Delete Prompt"
-              data-track="Delete Prompt Card"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="p-5 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <h4 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1 flex-grow pr-2">
-            {prompt.title}
-          </h4>
-          <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-            <TrendingUp className="w-3 h-3" />
-            <span>{prompt.usageCount || 0}</span>
-          </div>
-        </div>
-
-        {prompt.aiModel && (
-          <div className="flex items-center gap-1.5 mb-3">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
-              <Cpu className="w-2.5 h-2.5" />
-              <span>Best running with: <span className="text-slate-600">{prompt.aiModel}</span></span>
-            </div>
+          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 group-hover:bg-blue-50/30 transition-colors">
+             <div className="opacity-10 scale-[3]">
+                {renderCategoryIcon(prompt.category)}
+             </div>
           </div>
         )}
         
-        <p className="text-slate-500 text-sm mb-6 line-clamp-2 italic leading-relaxed flex-grow">
+        {/* Badges */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
+          <div className={`px-2.5 py-1 text-[10px] font-black rounded-lg shadow-sm border uppercase tracking-[0.1em] flex items-center gap-1.5 backdrop-blur-md ${getCategoryStyles(prompt.category)}`}>
+            {renderCategoryIcon(prompt.category)}
+            {prompt.category}
+          </div>
+          {variables.length > 0 && (
+            <div className="px-2.5 py-1 text-[10px] font-black bg-blue-600 text-white rounded-lg shadow-sm uppercase tracking-[0.1em] flex items-center gap-1.5">
+              <Cpu className="w-3 h-3" />
+              Dynamic
+            </div>
+          )}
+        </div>
+
+        {/* Author Actions */}
+        {isAuthor && (
+          <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all">
+            <button 
+              onClick={handleEdit}
+              className="p-2 bg-white/90 backdrop-blur-md shadow-lg hover:bg-blue-600 hover:text-white rounded-xl transition-all border border-white/20"
+              title="Edit Prompt"
+              data-track="Edit Prompt Card"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={handleDelete}
+              className="p-2 bg-white/90 backdrop-blur-md shadow-lg hover:bg-rose-600 hover:text-white rounded-xl transition-all border border-white/20"
+              title="Delete Prompt"
+              data-track="Delete Prompt Card"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="p-6 flex flex-col flex-1">
+        {/* Title & Model */}
+        <div className="mb-4">
+          <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">
+            {prompt.aiModel}
+          </div>
+          <h4 className="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">
+            {prompt.title}
+          </h4>
+        </div>
+
+        <p className="text-slate-500 text-sm mb-6 line-clamp-3 italic leading-relaxed flex-1">
           "{prompt.description}"
         </p>
 
-        <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold overflow-hidden shadow-inner">
-              {prompt.authorPhotoURL ? (
-                <img src={prompt.authorPhotoURL} alt={prompt.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              ) : (
-                (prompt.authorName || 'U').charAt(0).toUpperCase()
-              )}
+        {/* Footer Meta */}
+        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 font-bold overflow-hidden border-2 border-white shadow-sm">
+                {prompt.authorPhotoURL ? (
+                  <img src={prompt.authorPhotoURL} alt={prompt.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  (prompt.authorName || 'U').charAt(0).toUpperCase()
+                )}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">@{ (prompt.authorName || 'user').toLowerCase().replace(/\s+/g, '_')}</span>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Architect</p>
+              <p className="text-[11px] font-bold text-slate-700 leading-none">{(prompt.authorName || 'User')}</p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <button 
               onClick={handleShare}
-              className="text-slate-400 hover:text-blue-600 transition-colors"
-              title="Share direct link"
+              className="p-2 text-slate-400 hover:text-blue-600 transition-colors bg-slate-50 rounded-lg"
+              title="Share Link"
               data-track="Share Prompt Card"
             >
-              {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
+              {shared ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); onLike(prompt.id); }}
-              className={`flex items-center gap-1 transition-colors px-1 ${
-                userId && prompt.likes?.includes(userId) ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
+              className={`flex items-center gap-1.5 p-2 rounded-lg transition-all ${
+                userId && prompt.likes?.includes(userId) ? 'bg-rose-50 text-rose-500' : 'bg-slate-50 text-slate-400 hover:text-rose-500'
               }`}
               data-track="Like Prompt Card"
             >
-              <Heart className={`w-3.5 h-3.5 ${userId && prompt.likes?.includes(userId) ? 'fill-current' : ''}`} />
-              <span className="text-[11px] font-bold">{prompt.likesCount || 0}</span>
+              <Heart className={`w-4 h-4 ${userId && prompt.likes?.includes(userId) ? 'fill-current' : ''}`} />
+              <span className="text-[11px] font-black">{prompt.likesCount || 0}</span>
             </button>
             <button 
               onClick={handleCopy}
-              className="text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:text-blue-700 transition-colors bg-blue-50 px-2 py-1 rounded-lg"
+              className="px-3 py-2 bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all rounded-lg shadow-sm active:scale-95"
               data-track="Copy Prompt Card"
             >
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? 'Copied' : 'Copy'}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

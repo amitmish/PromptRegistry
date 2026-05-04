@@ -204,6 +204,78 @@ export const promptService = {
       console.error("Seeding failed: No authenticated user.");
       return;
     }
+    const templates: any[] = [
+      {
+        category: "Coding",
+        tags: ["programming", "architecture", "dev-ops"],
+        model: "Gemini 1.5 Pro",
+        subjects: [
+          "Microservices Resilience with Circuit Breakers",
+          "Optimizing React Component Performance",
+          "Rust Memory Safety Patterns",
+          "Kubernetes Horizontal Pod Autoscaling",
+          "Secure JWT Authentication Flow"
+        ],
+        prompts: [
+          "Act as a Senior Software Engineer. Explain the implementation of {subject} in a production environment. Provide a clear architectural overview, potential pitfalls to avoid, and a concise code example that demonstrates best practices. Focusing on readability and maintainability is key.",
+          "Develop a step-by-step guide for implementing {subject}. Include considerations for testing, monitoring, and scaling. The target audience is intermediate developers looking for a deep dive into functional patterns.",
+          "Review the standard approach to {subject}. Identify three common anti-patterns and propose optimized alternatives. Explain the performance implications of each change in detail."
+        ]
+      },
+      {
+        category: "Images",
+        tags: ["art", "design", "cinematography"],
+        model: "Midjourney v6.1",
+        subjects: [
+          "Cyberpunk Tokyo Street in Rain",
+          "Minimalist Japanese Tea House",
+          "Surrealist Underwater Library",
+          "Brutalist Concrete Cathedral",
+          "Steam-punk Alchemy Lab"
+        ],
+        prompts: [
+          "Cinematic shot of {subject}. Lighting: split lighting with neon accents. Camera: Hasselblad, 80mm lens, f/2.8. Color palette: deep teals and vibrant oranges. Atmosphere: moody, volumetric fog, hyper-realistic textures, 8k resolution.",
+          "A stunning {subject} designed in a minimalist style. Focus on architectural symmetry and the play of natural light and shadow. Use a neutral color palette with wood and stone textures. Highly detailed, clean lines, editorial photography style.",
+          "Digital art piece portraying {subject}. Style: ethereal surrealism. Soft lighting, pastel gradients, dream-like quality. Intricate details on every surface. 16k, high contrast, trending on ArtStation."
+        ],
+        resultImagePrefix: "https://images.unsplash.com/photo-"
+      },
+      {
+        category: "Business",
+        tags: ["marketing", "strategy", "finance"],
+        model: "GPT-4o",
+        subjects: [
+          "SaaS Go-To-Market Strategy",
+          "Product-Led Growth Framework",
+          "Series A Pitch Deck Checklist",
+          "Retention Analysis for E-commerce",
+          "Corporate ESG Reporting"
+        ],
+        prompts: [
+          "Act as a Management Consultant. Draft a comprehensive {subject}. Break it down into executive summary, core objectives, market analysis, and key performance indicators. The tone should be professional, data-driven, and actionable.",
+          "Analyze the effectiveness of current {subject} models. Identify emerging trends and provide a roadmap for integration into a mid-sized enterprise. Focus on high ROI and long-term sustainability.",
+          "Create a presentation outline for {subject}. Each slide should have a clear purpose and supporting data points. The goal is to persuade stakeholders of a strategic shift in direction."
+        ]
+      },
+      {
+        category: "Writing",
+        tags: ["copywriting", "creative", "fiction"],
+        model: "Claude 3.5 Sonnet",
+        subjects: [
+          "The Future of Urban Migration",
+          "Ethics of Neural Link Interfaces",
+          "A Short Story about Time-Dilation",
+          "Persuasive Essay on Renewable Energy",
+          "Blog Post about Mindful Productivity"
+        ],
+        prompts: [
+          "Write a compelling {subject}. Use a tone that is engaging, thought-provoking, and slightly provocative. Weave in historical references and future predictions to build a rich narrative. The goal is to spark conversation among high-level readers.",
+          "Develop a detailed character study for a protagonist experiencing {subject}. Focus on internal monologue, sensory details, and the emotional arc of their journey. The writing should be lyrical and evocative.",
+          "Draft a long-form article exploring the intersection of technology and {subject}. Provide balanced viewpoints, expert quotes (invented), and a concluding call to action that inspires change."
+        ]
+      }
+    ];
+
     const authors = [
       { name: "Julian Vance", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop" },
       { name: "Sofia Chen", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop" },
@@ -212,122 +284,24 @@ export const promptService = {
       { name: "David Sterling", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" }
     ];
 
-    const techSubjects = [
-      "Event-Driven Microservices Architecture with Apache Kafka",
-      "Real-time Distributed Database Consistency in Global Clusters",
-      "Sub-millisecond Latency Optimization for High-Frequency Trading Systems",
-      "Zero-Knowledge Proof Implementation for Privacy-Preserving DeFi",
-      "Kubernetes Multi-Cluster Traffic Management using Istio Service Mesh"
-    ];
-
-    const imageSubjects = [
-      "Brutalist Architecture in a Desert Oasis at Golden Hour",
-      "Macro Cinematography of an Antique Watch Internal Mechanism",
-      "Cybernetic Street Market in a Neofuturistic Singapore District",
-      "Minimalist Scandinavian Interior Design with Dynamic Light Shadows",
-      "Hyper-detailed Portrait of a Nomad Explorer in a Solar Storm"
-    ];
-
-    const businessSubjects = [
-      "Series B Fundraising Deck Strategy for a Sustainable Energy Startup",
-      "Market Entry Analysis for a FinTech Disruption in Emerging Economies",
-      "Corporate ESG Transition Roadmap for a Global Logistics Entity",
-      "Product-Led Growth Engine Optimization for Enterprise SaaS",
-      "Cross-Border M&A Integration Strategy for Tech Giants"
-    ];
-
-    const templates: any[] = [
-      {
-        category: "Coding",
-        tags: ["architecture", "performance", "backend", "scalability"],
-        model: "GPT-4o",
-        titlePattern: ["{subject}: Implementation Blueprint", "Scalability Audit for {subject}"],
-        contentPattern: [
-          "Act as a Principal Software Architect. Develop a comprehensive technical specification for {subject}. \n\nThe documentation must include:\n1. System Design: Detailed component diagram description and inter-process communication protocols.\n2. Data Modeling: Schema definitions for high-throughput persistence layers, focusing on normalization vs. performance trade-offs.\n3. Security Infrastructure: Implementation of mTLS, JWT rotation, and RBAC at the edge.\n4. Scalability: Auto-scaling triggers, circuit breaker patterns, and multi-region failover strategies.\n\nCode Requirement: Provide a production-ready boilerplate in TypeScript/Go including robust middleware for observability (tracing/metrics).",
-        ]
-      },
-      {
-        category: "Images",
-        tags: ["commercial", "editorial", "ultra-detailed", "visionary"],
-        model: "Midjourney v6.1",
-        titlePattern: ["Visual Narrative: {subject}", "Conceptual Study of {subject}"],
-        contentPattern: [
-          "Professional Art Director's Brief for {subject}.\n\nVisual Direction: The aesthetic must lean into high-contrast chiaroscuro lighting, emphasizing texture and material honesty. \n\nTechnical Specs: \n- Lighting: Triple-point lighting setup with a warm key light and blue-tinted fill. Volumetric lighting to define depth.\n- Composition: Golden ratio alignment with a strong focus on leading lines.\n- Color Grade: Desaturated shadows with vibrant highlights, inspired by 70mm IMAX cinematography.\n- Rendering: Ray-traced reflections, extreme close-up detail (4-8k), f/2.8 aperture for sharp depth falloff.",
-        ],
-        resultImagePrefix: "https://images.unsplash.com/photo-"
-      },
-      {
-        category: "Business",
-        tags: ["strategy", "leadership", "consulting", "growth"],
-        model: "Claude 3.5 Sonnet",
-        titlePattern: ["Strategic Executive Brief: {subject}", "Operational Roadmap for {subject}"],
-        contentPattern: [
-          "Act as a Senior Partner at a Tier-1 Management Consulting firm. Develop a 10-page strategic framework for {subject}. \n\nFramework Objectives:\n- Gap Analysis: Identify current market inefficiencies and competitive disadvantages.\n- Economic Value Add (EVA): Quantify the long-term fiscal impact of the proposed transition.\n- Stakeholder Mapping: Analyze influence-interest quadrants for key decision-makers.\n- Risk Mitigation: Detailed contingency planning for regulatory shifts and supply chain volatility.\n\nThe tone must be executive-level, data-driven, and focused on actionable ROI.",
-        ]
-      },
-      {
-        category: "Writing",
-        tags: ["literary", "editorial", "long-form", "persuasive"],
-        model: "Claude 3.5 Sonnet",
-        titlePattern: ["The Philosophical Underpinnings of {subject}", "{subject}: A Contemporary Critique"],
-        contentPattern: [
-          "Write an 800-word long-form editorial for a prestigious intellectual magazine exploring {subject}.\n\nThe essay should weave together historical context, sociological impact, and future-forward speculation. Use a sophisticated vocabulary and complex sentence structures. Avoid hyperbole; instead, rely on nuanced arguments and evocative imagery. \n\nKey themes to explore: The intersection of human agency and technological deterministic forces, the erosion of traditional boundaries, and the synthesis of new cultural paradigms.",
-        ]
-      }
-    ];
-
-    const subjectsMap: Record<string, string[]> = {
-      "Coding": techSubjects,
-      "Images": imageSubjects,
-      "Business": businessSubjects,
-      "Writing": ["The Singularity", "Post-Capitalist Aesthetics", "Digital Dualism", "The Ethics of Artificial General Intelligence"]
-    };
-
     const unsplashIds = ["1451187580459-43490279c0fa", "1518770660439-4636190af475", "1550751827-4bd374c3f58b", "1485827404703-89b55fcc595e", "1531297484001-80022131f5a1"];
 
     for (let i = 0; i < count; i++) {
         const template = templates[Math.floor(Math.random() * templates.length)];
-        const categorySubjects = subjectsMap[template.category] || techSubjects;
-        const subject = categorySubjects[Math.floor(Math.random() * categorySubjects.length)];
+        const subject = template.subjects[Math.floor(Math.random() * template.subjects.length)];
         const author = authors[Math.floor(Math.random() * authors.length)];
+        const basePrompt = template.prompts[Math.floor(Math.random() * template.prompts.length)];
         
-        const title = template.titlePattern[Math.floor(Math.random() * template.titlePattern.length)].replace("{subject}", subject);
-        const contentPatternLine = template.contentPattern[Math.floor(Math.random() * template.contentPattern.length)];
-        const baseContent = contentPatternLine.replace(/{subject}/g, subject);
+        const title = `${subject}: Professional Blueprint`;
+        const content = basePrompt.replace(/{subject}/g, subject);
         
-        // Generate "half a page" of content by adding detailed context and expansion
-        const expandedContent = `
-# ${title}
-## Project Overview
-The following prompt is designed for high-level ${template.category} applications. It addresses the complexities of ${subject} with a focus on professional standards and extreme technical accuracy.
-
-## The Professional Prompt
-${baseContent}
-
-## Operational Context & Constraints
-When executing this prompt, ensure that the AI model maintains a status-agnostic viewpoint while prioritizing the following parameters:
-- Precision: All quantitative data must be cross-referenced with current ${template.category} benchmarks.
-- Nuance: Avoid binary conclusions; explore the gradients of implementation.
-- Scalability: The solution must be viable for Enterprise-level deployment.
-
-## Technical Appendix
-${"Additional detailed context for " + subject + " integration. ".repeat(15)}
-
-## Performance Expectations
-1. Response Time: Tier 1 priority.
-2. Accuracy: Verified against current ${template.category} literature.
-3. Creativity: High temperature (0.7-0.9) to encourage divergent thinking while maintaining structural integrity.
-
-${baseContent.repeat(3)}
-        `;
-
         const resultImage = template.resultImagePrefix ? `${template.resultImagePrefix}${unsplashIds[Math.floor(Math.random() * unsplashIds.length)]}?auto=format&fit=crop&q=80&w=1200` : undefined;
 
         try {
             await this.createPrompt({
                 title,
-                description: `Professional-grade ${template.category} framework focusing on the complexities of ${subject.toLowerCase()} and high-stakes implementation.`,
-                content: expandedContent,
+                description: `A highly accurate and useful ${template.category} instruction focusing on the nuances of ${subject.toLowerCase()}.`,
+                content: content,
                 category: template.category,
                 tags: template.tags.map(t => t.toLowerCase()),
                 aiModel: template.model,
@@ -340,7 +314,6 @@ ${baseContent.repeat(3)}
         }
 
         if (onProgress) onProgress(i + 1, count);
-        // Small delay to prevent hitting Firestore limits too hard in one burst
         if (i % 5 === 0) await new Promise(r => setTimeout(r, 100));
     }
 

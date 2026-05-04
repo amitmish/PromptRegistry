@@ -14,7 +14,11 @@ import {
   Database,
   Loader2,
   Trash2,
-  MousePointer2
+  MousePointer2,
+  Zap,
+  RefreshCw,
+  ChevronRight,
+  ShieldCheck
 } from 'lucide-react';
 import { analyticsService } from '../services/analyticsService';
 import { promptService } from '../services/promptService';
@@ -171,267 +175,312 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   ];
 
   return (
-    <div className="flex-1 bg-slate-50 overflow-y-auto p-4 md:p-8 flex flex-col items-center">
-      <div className="max-w-6xl w-full">
-        <div className="flex items-center gap-4 mb-8">
+    <div className="flex-1 bg-white overflow-hidden flex flex-col h-full font-sans selection:bg-blue-100 italic-selection:bg-slate-900 selection:text-blue-900">
+      {/* High-Tech Header */}
+      <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 lg:px-12 justify-between bg-white relative z-20">
+        <div className="flex items-center gap-4 md:gap-6">
           <button 
             onClick={onBack}
-            className="p-2 hover:bg-slate-200 rounded-full text-slate-600 transition-colors"
+            className="p-2.5 md:p-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all shadow-lg active:scale-95"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Admin Command Center</h1>
-            <p className="text-slate-500 text-sm">Real-time platform health and activity tracking</p>
-          </div>
-        </div>
-
-        {/* Stat Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-10">
-          {statCards.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"
-            >
-              <div className={`p-3 ${stat.bg} ${stat.color} rounded-xl mb-3`}>
-                <stat.icon className="w-6 h-6" />
-              </div>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">{stat.label}</p>
-              <p className="text-2xl font-black text-slate-800">{stat.value.toLocaleString()}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Seeding & Maintenance Tools */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
-        <div className="flex items-center gap-2 mb-6">
-          <Database className="w-5 h-5 text-amber-600" />
-          <h3 className="font-bold text-slate-800 text-lg">System Tools</h3>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Seeding Controls */}
-          <div>
-            <h4 className="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Data Seeding</h4>
-            <p className="text-sm text-slate-500 mb-4">Generate high-quality, ultra-detailed prompts to populate the platform.</p>
-            
-            <div className="flex flex-wrap gap-2">
-              {[10, 50, 100, 500].map(count => (
-                <button
-                  key={count}
-                  onClick={() => handleSeed(count)}
-                  disabled={seeding}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  <Database className="w-4 h-4" />
-                  Seed {count}
-                </button>
-              ))}
+            <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter leading-none mb-1">COMMAND CONSOLE</h1>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">System Level: Administrative • v1.0.4-Alpha</p>
             </div>
-            
-            {seedStatus && (
-              <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                <p className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-2">
-                  {seeding ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                  {seedStatus}
-                </p>
-                {seeding && (
-                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-blue-600"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(seedProgress.current / seedProgress.total) * 100}%` }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
           </div>
+        </div>
 
-          {/* Maintenance */}
-          <div>
-            <h4 className="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Maintenance</h4>
-            <p className="text-sm text-slate-500 mb-4">Optimize the database and remove redundant or low-quality information.</p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleCleanup}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-slate-200 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-50 transition-all"
+        <div className="flex items-center gap-4 md:gap-8">
+           <div className="hidden lg:block text-right">
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Buffer Status</p>
+              <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Synchronized • 0s Latency</p>
+           </div>
+           {seeding ? (
+             <div className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2.5 md:py-3 bg-blue-50 rounded-2xl border border-blue-100">
+                <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                <span className="text-[9px] md:text-[10px] font-black text-blue-600 uppercase tracking-widest">Compiling...</span>
+             </div>
+           ) : (
+             <div className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2.5 md:py-3 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span className="text-[9px] md:text-[10px] font-black text-emerald-600 uppercase tracking-widest">Secured</span>
+             </div>
+           )}
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto bg-slate-50/50 p-4 md:p-8 lg:p-12">
+        <div className="max-w-7xl mx-auto space-y-8 lg:space-y-12">
+          
+          {/* Real-time Telemetry Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-6">
+            {statCards.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-between group hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-default relative overflow-hidden"
               >
-                <Trash2 className="w-4 h-4" />
-                Remove Duplicates
-              </button>
-              
-              {!showPurgeConfirm ? (
-                <button
-                  onClick={() => setShowPurgeConfirm(true)}
-                  disabled={seeding}
-                  className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-lg text-sm font-bold hover:bg-rose-100 disabled:opacity-50 transition-all"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Purge & Re-seed (50)
-                </button>
-              ) : (
-                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
-                  <button
-                    onClick={handlePurgeAndReseed}
-                    disabled={seeding}
-                    className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold hover:bg-rose-700 shadow-lg shadow-rose-200 transition-all"
-                  >
-                    Confirm Clear All?
-                  </button>
-                  <button
-                    onClick={() => setShowPurgeConfirm(false)}
-                    disabled={seeding}
-                    className="px-4 py-2 bg-slate-200 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-300 transition-all"
-                  >
-                    Cancel
-                  </button>
+                <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                   <stat.icon className="w-12 md:w-16 h-12 md:h-16" />
                 </div>
-              )}
-            </div>
+                <div className={`w-8 h-8 md:w-10 md:h-10 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center mb-4 md:mb-6 group-hover:rotate-12 transition-transform`}>
+                  <stat.icon className="w-4 md:w-5 h-4 md:h-5" />
+                </div>
+                <div>
+                  <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">{stat.value.toLocaleString()}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+             {/* System Engineering Panel */}
+             <div className="lg:col-span-8 bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                <div className="p-6 md:p-8 border-b border-slate-50 flex items-center justify-between">
+                   <div className="flex items-center gap-4">
+                      <div className="w-1 h-6 md:h-8 bg-blue-600 rounded-full" />
+                      <div>
+                         <h3 className="text-lg md:text-xl font-black text-slate-800 tracking-tighter">DATA SEEDING ENGINE</h3>
+                         <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Synthetic Intelligence Injection</p>
+                      </div>
+                   </div>
+                   <Database className="w-5 h-5 md:w-6 md:h-6 text-slate-200" />
+                </div>
+                
+                <div className="p-6 md:p-10 space-y-10 lg:space-y-12">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+                      <div className="space-y-4 md:space-y-6">
+                         <h4 className="text-[10px] md:text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <Zap className="w-3.5 h-3.5 text-blue-500" />
+                            Fast Deployment
+                         </h4>
+                         <p className="text-[11px] md:text-xs text-slate-500 font-medium italic leading-relaxed line-clamp-2 md:line-clamp-none">
+                            "Directly inject high-fidelity architectural blueprints into the registry core. Optimized for initial system population."
+                         </p>
+                         <div className="grid grid-cols-2 gap-3 md:gap-4">
+                            {[10, 50].map(count => (
+                               <button
+                                 key={count}
+                                 onClick={() => handleSeed(count)}
+                                 disabled={seeding}
+                                 className="py-3 md:py-4 bg-slate-100 hover:bg-slate-900 border border-slate-200 hover:border-slate-900 text-slate-800 hover:text-white rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 active:scale-[0.98] group"
+                               >
+                                 {count} UNITS
+                               </button>
+                            ))}
+                         </div>
+                      </div>
+
+                      <div className="space-y-4 md:space-y-6">
+                         <h4 className="text-[10px] md:text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <Layers className="w-3.5 h-3.5 text-purple-500" />
+                            Extreme Load Build
+                         </h4>
+                         <p className="text-[11px] md:text-xs text-slate-500 font-medium italic leading-relaxed line-clamp-2 md:line-clamp-none">
+                            "Concurrent archival of massive data clusters. Recommended for scalability benchmarking."
+                         </p>
+                         <div className="grid grid-cols-2 gap-3 md:gap-4">
+                            {[100, 500].map(count => (
+                               <button
+                                 key={count}
+                                 onClick={() => handleSeed(count)}
+                                 disabled={seeding}
+                                 className="py-3 md:py-4 bg-slate-100 hover:bg-blue-600 border border-slate-200 hover:border-blue-600 text-slate-800 hover:text-white rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 active:scale-[0.98]"
+                               >
+                                 {count} UNITS
+                               </button>
+                            ))}
+                         </div>
+                      </div>
+                   </div>
+
+                   {seedStatus && (
+                      <div className="p-6 md:p-8 bg-slate-900 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
+                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 via-transparent to-transparent" />
+                         <div className="relative z-10 space-y-4 md:space-y-6">
+                            <div className="flex items-center justify-between">
+                               <div className="flex items-center gap-3">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+                                  <span className="text-[9px] md:text-[10px] font-black text-blue-400 uppercase tracking-widest truncate max-w-[200px]">{seedStatus}</span>
+                               </div>
+                               <span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase font-mono italic">
+                                  {Math.round((seedProgress.current / seedProgress.total) * 100 || 0)}%
+                               </span>
+                            </div>
+                            <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                               <motion.div 
+                                 className="h-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+                                 initial={{ width: 0 }}
+                                 animate={{ width: `${(seedProgress.current / (seedProgress.total || 1)) * 100}%` }}
+                                 transition={{ duration: 0.3 }}
+                               />
+                            </div>
+                         </div>
+                      </div>
+                   )}
+                </div>
+             </div>
+
+             {/* Maintenance Architecture */}
+             <div className="lg:col-span-4 space-y-6 md:space-y-8">
+                <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-slate-100 shadow-sm">
+                   <h4 className="text-xs md:text-sm font-black text-slate-800 uppercase tracking-[0.2em] mb-6">Core Maintenance</h4>
+                   <div className="space-y-4">
+                      <button
+                        onClick={handleCleanup}
+                        className="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-500 rounded-xl md:rounded-2xl transition-all group"
+                      >
+                         <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white rounded-lg text-slate-400 group-hover:text-blue-600 transition-colors">
+                               <RefreshCw className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] md:text-[11px] font-black text-slate-800 uppercase tracking-widest text-left">Deduplicate Archives</span>
+                         </div>
+                         <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                      </button>
+
+                      {!showPurgeConfirm ? (
+                        <button
+                          onClick={() => setShowPurgeConfirm(true)}
+                          disabled={seeding}
+                          className="w-full flex items-center justify-between p-4 md:p-5 bg-rose-50 hover:bg-rose-100 border border-rose-100 rounded-xl md:rounded-2xl transition-all group"
+                        >
+                           <div className="flex items-center gap-4">
+                              <div className="p-2 bg-white rounded-lg text-rose-400 group-hover:text-rose-600 transition-colors">
+                                 <Trash2 className="w-4 h-4" />
+                              </div>
+                              <span className="text-[10px] md:text-[11px] font-black text-rose-800 uppercase tracking-widest text-left">Protocol Reset</span>
+                           </div>
+                           <ChevronRight className="w-4 h-4 text-rose-300 group-hover:text-rose-600 transition-colors" />
+                        </button>
+                      ) : (
+                        <div className="space-y-3 p-1">
+                           <p className="text-[9px] md:text-[10px] font-black text-rose-600 uppercase tracking-widest text-center animate-pulse mb-2">INITIALIZING DEEP PURGE SEQUENCE</p>
+                           <div className="flex gap-2">
+                              <button
+                                onClick={handlePurgeAndReseed}
+                                disabled={seeding}
+                                className="flex-1 py-3.5 md:py-4 bg-rose-600 text-white rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 shadow-xl shadow-rose-600/20 active:scale-95 transition-all"
+                              >
+                                EXECUTE
+                              </button>
+                              <button
+                                onClick={() => setShowPurgeConfirm(false)}
+                                disabled={seeding}
+                                className="px-4 md:px-6 py-3.5 md:py-4 bg-slate-900 text-white rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
+                              >
+                                HALT
+                              </button>
+                           </div>
+                        </div>
+                      )}
+                   </div>
+                </div>
+
+                <div className="bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white relative overflow-hidden">
+                   <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12">
+                      <ShieldCheck className="w-24 md:w-32 h-24 md:h-32" />
+                   </div>
+                   <h4 className="text-[10px] md:text-[11px] font-black text-blue-400 uppercase tracking-[0.3em] mb-3 md:mb-4">Security Protocol</h4>
+                   <p className="text-[11px] md:text-xs text-slate-400 leading-relaxed font-medium mb-6 md:mb-8">"Administrative actions are logged in the global audit trail. Level-7 lockdown protocol active."</p>
+                   <div className="flex items-center justify-between pt-4 md:pt-6 border-t border-white/10">
+                      <div className="flex items-center gap-2">
+                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                         <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Secure</span>
+                      </div>
+                      <span className="text-[9px] font-black text-slate-600 uppercase">Audit active</span>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          {/* User & Blueprint Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-12">
+             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                <div className="p-6 md:p-8 border-b border-slate-50 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <Users className="w-4 h-4 md:w-5 md:h-5 text-indigo-600" />
+                      <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs md:text-sm">Operator Logs</h3>
+                   </div>
+                   <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase">{stats.userCount} IDs</span>
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-[400px] md:max-h-[500px]">
+                   <table className="w-full text-left">
+                      <thead className="bg-slate-50/50 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                         <tr>
+                            <th className="px-6 md:px-8 py-3 md:py-4">Operator</th>
+                            <th className="hidden sm:table-cell px-6 md:px-8 py-3 md:py-4">Credentials</th>
+                            <th className="px-6 md:px-8 py-3 md:py-4">Entry</th>
+                         </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50">
+                         {stats.users.map((u, i) => (
+                            <tr key={u.uid || i} className="hover:bg-slate-50/50 transition-colors group">
+                               <td className="px-6 md:px-8 py-4 md:py-6">
+                                  <div className="flex items-center gap-3 md:gap-4">
+                                     <div className="relative">
+                                        <img src={u.photoURL || `https://ui-avatars.com/api/?name=${u.displayName}`} className="w-8 h-8 md:w-10 md:h-10 rounded-xl grayscale group-hover:grayscale-0 transition-all border border-slate-100 shadow-sm" alt="" />
+                                        <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white" />
+                                     </div>
+                                     <span className="text-[11px] md:text-xs font-black text-slate-800 uppercase tracking-tighter truncate max-w-[80px] md:max-w-[120px]">{u.displayName}</span>
+                                  </div>
+                               </td>
+                               <td className="hidden sm:table-cell px-6 md:px-8 py-4 md:py-6 text-[10px] text-slate-400 font-mono italic truncate max-w-[150px]">{u.email}</td>
+                               <td className="px-6 md:px-8 py-4 md:py-6 text-[10px] text-slate-400 font-black uppercase tracking-widest whitespace-nowrap">
+                                  {u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString() : '—'}
+                               </td>
+                            </tr>
+                         ))}
+                      </tbody>
+                   </table>
+                </div>
+             </div>
+
+             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                <div className="p-6 md:p-8 border-b border-slate-50 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                      <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs md:text-sm">Blueprint Streams</h3>
+                   </div>
+                   <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase">{stats.promptCount} Clusters</span>
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-[400px] md:max-h-[500px]">
+                   <div className="divide-y divide-slate-50">
+                      {stats.prompts.map((p, i) => (
+                         <div key={p.id || i} className="p-6 md:p-8 hover:bg-slate-50/50 transition-all group flex items-start justify-between">
+                            <div className="flex-1 pr-4 md:pr-6">
+                               <div className="flex items-center gap-2 md:gap-3 mb-2">
+                                  <span className="text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 bg-slate-900 text-white rounded uppercase tracking-[0.2em]">{p.category}</span>
+                                  <span className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest">By {p.authorName}</span>
+                               </div>
+                               <h4 className="text-xs md:text-sm font-black text-slate-800 tracking-tighter mb-1 line-clamp-1 group-hover:text-blue-600 transition-colors">{p.title}</h4>
+                               <p className="text-[9px] md:text-[10px] text-slate-400 font-medium italic line-clamp-1 opacity-70">"{p.description}"</p>
+                            </div>
+                            <div className="flex items-center gap-4 md:gap-6 text-slate-300">
+                               <div className="text-center group-hover:text-rose-500 transition-colors">
+                                  <Heart className="w-3 md:w-4 h-3 md:h-4 mb-1" />
+                                  <p className="text-[9px] md:text-[10px] font-black">{p.likesCount || 0}</p>
+                                </div>
+                               <div className="text-center group-hover:text-blue-500 transition-colors">
+                                  <Eye className="w-3 md:w-4 h-3 md:h-4 mb-1" />
+                                  <p className="text-[9px] md:text-[10px] font-black">{p.usageCount || 0}</p>
+                               </div>
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Users */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-indigo-600" />
-                <h3 className="font-bold text-slate-800">Recent Users</h3>
-              </div>
-              <span className="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full uppercase tracking-wider">
-                Total: {stats.userCount}
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto max-h-[400px]">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  <tr>
-                    <th className="px-5 py-3">User</th>
-                    <th className="px-5 py-3">Email</th>
-                    <th className="px-5 py-3">Joined</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {stats.users.slice(0, 10).map((u, i) => (
-                    <tr key={u.uid || i} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={u.photoURL || `https://ui-avatars.com/api/?name=${u.displayName}`} 
-                            className="w-8 h-8 rounded-full shadow-sm"
-                            alt={u.displayName}
-                          />
-                          <span className="text-sm font-bold text-slate-700">{u.displayName}</span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-xs text-slate-500 font-mono">{u.email}</td>
-                      <td className="px-5 py-4 text-xs text-slate-400">
-                        {u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {stats.users.length === 0 && (
-                <div className="p-8 text-center text-slate-400 italic">No users found yet</div>
-              )}
-            </div>
-          </div>
-
-          {/* Recent Prompts */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-800">Latest Prompts</h3>
-              </div>
-              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full uppercase tracking-wider">
-                Total: {stats.promptCount}
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto max-h-[400px]">
-              <div className="divide-y divide-slate-50">
-                {stats.prompts.slice(0, 10).map((p, i) => (
-                  <div key={p.id || i} className="p-5 hover:bg-slate-50 transition-colors flex items-center justify-between group">
-                    <div className="flex-1 pr-4">
-                      <h4 className="font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">{p.title}</h4>
-                      <p className="text-xs text-slate-400 flex items-center gap-2">
-                        <span className="font-bold text-slate-500 uppercase tracking-widest">{p.category}</span>
-                        <span>•</span>
-                        <span>by {p.authorName}</span>
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4 text-slate-400">
-                      <div className="flex flex-col items-center">
-                        <Heart className="w-3.5 h-3.5 mb-1" />
-                        <span className="text-[10px] font-bold">{p.likesCount || 0}</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Eye className="w-3.5 h-3.5 mb-1" />
-                        <span className="text-[10px] font-bold">{p.usageCount || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {stats.prompts.length === 0 && (
-                  <div className="p-8 text-center text-slate-400 italic">No prompts published yet</div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Clicks Breakdown */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MousePointer2 className="w-5 h-5 text-amber-600" />
-                <h3 className="font-bold text-slate-800">Most Used Buttons</h3>
-              </div>
-              <span className="text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-1 rounded-full uppercase tracking-wider">
-                Total Clicks: {stats.totalClicks || 0}
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto max-h-[400px]">
-              <div className="p-4 space-y-3">
-                {stats.clicksByButton ? (
-                  Object.entries(stats.clicksByButton)
-                    .sort((a, b) => (b[1] as number) - (a[1] as number))
-                    .map(([btn, count]) => {
-                      const percentage = stats.totalClicks ? Math.round(((count as number) / stats.totalClicks) * 100) : 0;
-                      return (
-                        <div key={btn} className="space-y-1">
-                          <div className="flex justify-between text-xs font-bold text-slate-700">
-                            <span className="truncate pr-2">{btn}</span>
-                            <span>{count} clicks ({percentage}%)</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              className="h-full bg-amber-400"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })
-                ) : (
-                  <div className="py-8 text-center text-slate-400 italic">No click data available yet</div>
-                )}
-                {stats.clicksByButton && Object.keys(stats.clicksByButton).length === 0 && (
-                  <div className="py-8 text-center text-slate-400 italic">No clicks recorded yet</div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
