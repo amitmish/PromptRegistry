@@ -240,14 +240,22 @@ export default function App() {
       <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-50 border-r border-slate-200 transform transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-            <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => { setView('Feed'); setSelectedCategory('All'); setIsMobileMenuOpen(false); }}>
-              <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
-                <Terminal className="w-5 h-5 text-white" />
+            <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center gap-3 group cursor-pointer" onClick={() => { setView('Feed'); setSelectedCategory('All'); setIsMobileMenuOpen(false); }}>
+                <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+                  <Terminal className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-black text-xl tracking-tighter leading-none text-slate-800">REGISTRY</h1>
+                  <p className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] mt-1.5 opacity-80 group-hover:opacity-100 transition-opacity">v1.0.4 • Alpha</p>
+                </div>
               </div>
-              <div>
-                <h1 className="font-black text-xl tracking-tighter leading-none text-slate-800">REGISTRY</h1>
-                <p className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] mt-1.5 opacity-80 group-hover:opacity-100 transition-opacity">v1.0.4 • Alpha</p>
-              </div>
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="lg:hidden p-2 text-slate-400 hover:text-slate-900"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <nav className="space-y-1">
@@ -361,12 +369,12 @@ export default function App() {
       {/* Main Execution Hub */}
       <main className="flex-1 flex flex-col h-full bg-white relative overflow-hidden">
         {/* Universal Header */}
-        <header className="h-20 border-b border-slate-100 flex items-center px-6 md:px-12 gap-8 bg-white/80 backdrop-blur-xl z-30 sticky top-0">
+        <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-12 gap-4 md:gap-8 bg-white/80 backdrop-blur-xl z-30 sticky top-0">
           <button 
             onClick={() => setIsMobileMenuOpen(true)}
-            className="lg:hidden p-2 text-slate-400 hover:text-slate-900"
+            className="lg:hidden p-2 text-slate-400 hover:text-slate-900 -ml-2"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5" />
           </button>
 
           <div className="relative flex-1 group">
@@ -374,7 +382,7 @@ export default function App() {
             <form onSubmit={handleSearch}>
               <input 
                 type="text"
-                placeholder="Query specialized architecture archives..."
+                placeholder={window.innerWidth < 768 ? "Search archives..." : "Query specialized architecture archives..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-8 pr-4 py-3 bg-transparent text-sm font-black text-slate-800 outline-none placeholder:text-slate-300 placeholder:uppercase placeholder:tracking-widest"
@@ -411,73 +419,71 @@ export default function App() {
               <>
                 {/* Bento Hero (Featured) */}
                 {prompts.length > 0 && searchQuery === '' && selectedCategory === 'All' && view === 'Feed' && !loading && (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
                      <div 
-                      className="md:col-span-8 group relative aspect-[21/9] md:aspect-auto md:h-[400px] bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl flex items-center p-8 md:p-16 border border-white/10 cursor-pointer" 
+                      className="lg:col-span-8 group relative aspect-[16/10] sm:aspect-[21/9] lg:aspect-auto lg:h-[400px] bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl flex items-center p-6 md:p-12 lg:p-16 border border-white/10 cursor-pointer" 
                       onClick={() => handlePromptClick(prompts[0])}
                     >
                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/50 via-slate-900 to-slate-900" />
                         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent" />
                         
                         <div className="relative z-10 max-w-lg">
-                           <div className="flex items-center gap-2 mb-6">
+                           <div className="flex items-center gap-2 mb-4 md:mb-6">
                               <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-                              <span className="px-3 py-1 bg-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-lg backdrop-blur-md">Featured Architecture</span>
+                              <span className="px-3 py-1 bg-white/10 text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-lg backdrop-blur-md">Featured Architecture</span>
                            </div>
-                           <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-4 leading-[0.95]">{prompts[0].title}</h2>
-                           <p className="text-slate-400 text-base md:text-lg mb-10 line-clamp-2 italic font-medium opacity-80">"{prompts[0].description}"</p>
+                           <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tighter mb-4 leading-[0.95]">{prompts[0].title}</h2>
+                           <p className="text-slate-400 text-sm md:text-base lg:text-lg mb-6 md:mb-10 line-clamp-2 italic font-medium opacity-80">"{prompts[0].description}"</p>
                            <div className="flex items-center gap-4">
-                              <button className="px-8 py-3.5 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2 shadow-xl shadow-blue-500/30">
+                              <button className="px-6 md:px-8 py-3 md:py-3.5 bg-blue-600 text-white rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2 shadow-xl shadow-blue-500/30">
                                  Open Blueprint <ChevronRight className="w-4 h-4" />
                               </button>
                            </div>
-                        </div>
-
-                        {prompts[0].resultImage && (
+                        </div>                         {prompts[0].resultImage && (
                           <div className="hidden lg:block absolute right-[-5%] top-[-5%] bottom-[-5%] w-1/2 overflow-hidden opacity-30 group-hover:opacity-50 transition-all duration-1000 rotate-3 group-hover:rotate-0">
                              <img src={prompts[0].resultImage} className="h-full w-full object-cover scale-110 group-hover:scale-100 transition-transform duration-[2000ms]" alt="" referrerPolicy="no-referrer" />
                           </div>
                         )}
-                     </div>
+                      </div>
 
-                     <div className="md:col-span-4 bg-white rounded-[2.5rem] p-10 flex flex-col justify-center border-2 border-blue-50 shadow-xl shadow-blue-500/5 relative overflow-hidden group">
+                      <div className="lg:col-span-4 bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col justify-center border-2 border-blue-50 shadow-xl shadow-blue-500/5 relative overflow-hidden group">
                         <div className="absolute -top-12 -right-12 p-8 opacity-5 scale-150 rotate-12 group-hover:rotate-0 transition-transform duration-1000">
                            <Sparkles className="w-48 h-48 text-blue-600" />
                         </div>
-                        <h3 className="text-2xl font-black tracking-tighter leading-none text-slate-800 mb-6">Engineering Status</h3>
-                        <div className="space-y-6 mb-10">
-                           <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Records</span>
-                              <span className="text-sm font-black text-blue-600">{prompts.length} UNITS</span>
+                        <h3 className="text-xl md:text-2xl font-black tracking-tighter leading-none text-slate-800 mb-4 md:mb-6">Engineering Status</h3>
+                        <div className="space-y-4 md:space-y-6 mb-6 md:mb-10">
+                           <div className="flex items-center justify-between border-b border-slate-50 pb-3 md:pb-4">
+                              <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Records</span>
+                              <span className="text-xs md:text-sm font-black text-blue-600">{prompts.length} UNITS</span>
                            </div>
-                           <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Load</span>
-                              <span className="text-sm font-black text-emerald-500">STABLE</span>
+                           <div className="flex items-center justify-between border-b border-slate-50 pb-3 md:pb-4">
+                              <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">System Load</span>
+                              <span className="text-xs md:text-sm font-black text-emerald-500">STABLE</span>
                            </div>
                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Deployments</span>
-                              <span className="text-sm font-black text-slate-800">12.4K</span>
+                              <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Deployments</span>
+                              <span className="text-xs md:text-sm font-black text-slate-800">12.4K</span>
                            </div>
                         </div>
                         <button 
                           onClick={() => setIsAboutModalOpen(true)}
-                          className="w-full py-4 bg-slate-50 text-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-200"
+                          className="w-full py-3 md:py-4 bg-slate-50 text-slate-800 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-200"
                         >
                           Protocol Overview
                         </button>
-                     </div>
-                  </div>
-                )}
+                      </div>
+                    </div>
+                  )}
 
                 {/* Grid Header */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-1 h-10 bg-blue-600 rounded-full" />
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-1 h-8 md:h-10 bg-blue-600 rounded-full" />
                     <div>
-                      <h2 className="text-3xl font-black text-slate-800 tracking-tighter">
+                      <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tighter">
                         {view === 'MyPrompts' ? 'AUTHOR ARCHIVES' : view === 'Favorites' ? 'SAVED BLUEPRINTS' : 'GLOBAL REGISTRY'}
                       </h2>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">
+                      <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">
                         {loading ? 'Initializing Interface...' : `Buffer Status: ${prompts.length} Clusters Loaded`}
                       </p>
                     </div>

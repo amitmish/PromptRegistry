@@ -37,7 +37,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
   const [copied, setCopied] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [variables, setVariables] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<'blueprint' | 'simulation'>('blueprint');
+  const [activeTab, setActiveTab] = useState<'details' | 'blueprint' | 'simulation'>('blueprint');
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -185,7 +185,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -198,10 +198,50 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
             initial={{ opacity: 0, scale: 0.95, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 30 }}
-            className="relative w-full max-w-5xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] border border-white/20"
+            className="relative w-full md:max-w-5xl bg-white md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col h-full md:h-[90vh] border border-white/20"
           >
-            {/* Left Sidebar: Blueprint Details */}
-            <div className="w-full md:w-80 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto">
+            {/* Global Header */}
+            <div className="p-4 md:p-6 border-b border-slate-200 bg-white flex items-center justify-between relative z-30 shrink-0">
+               <div className="flex items-center gap-3 md:gap-6">
+                  <div className="flex items-center gap-2 md:gap-4 bg-slate-100 p-1 rounded-xl">
+                     <button 
+                       onClick={() => setActiveTab('details')}
+                       className={`md:hidden px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'details' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                     >
+                       Details
+                     </button>
+                     <button 
+                       onClick={() => setActiveTab('blueprint')}
+                       className={`px-3 md:px-4 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'blueprint' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                     >
+                       Blueprint
+                     </button>
+                     <button 
+                       onClick={() => setActiveTab('simulation')}
+                       className={`px-3 md:px-4 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'simulation' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                     >
+                       Simulator
+                     </button>
+                  </div>
+                  <div className="hidden sm:block h-4 w-px bg-slate-200" />
+                  <div className="hidden sm:flex items-center gap-2">
+                     <div className={`w-2 h-2 rounded-full ${activeTab === 'simulation' ? 'bg-blue-500 animate-pulse' : 'bg-emerald-500'}`} />
+                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                       {activeTab === 'simulation' ? 'Simulator Active' : 'System Ready'}
+                     </span>
+                  </div>
+               </div>
+               <button 
+                  onClick={onClose}
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+            </div>
+
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+              {/* Sidebar Details (Responsive Tabs for Mobile) */}
+              <div className={`w-full md:w-80 bg-slate-50 md:border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto ${activeTab !== 'details' ? 'hidden md:flex' : 'flex'}`}>
                <div className="p-8">
                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/20 ${getCategoryStyles(prompt.category)}`}>
                     {renderIcon(prompt.category)}
@@ -285,39 +325,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
             </div>
 
             {/* Main Area: Execution Engine */}
-            <div className="flex-1 flex flex-col bg-slate-100/30 overflow-hidden">
-              <div className="p-6 border-b border-slate-200 bg-white flex items-center justify-between relative z-30">
-                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-4 bg-slate-100 p-1 rounded-xl">
-                       <button 
-                         onClick={() => setActiveTab('blueprint')}
-                         className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'blueprint' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                       >
-                         Blueprint
-                       </button>
-                       <button 
-                         onClick={() => setActiveTab('simulation')}
-                         className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'simulation' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                       >
-                         Simulator
-                       </button>
-                    </div>
-                    <div className="h-4 w-px bg-slate-200" />
-                    <div className="flex items-center gap-2">
-                       <div className={`w-2 h-2 rounded-full ${activeTab === 'simulation' ? 'bg-blue-500 animate-pulse' : 'bg-emerald-500'}`} />
-                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                         {activeTab === 'simulation' ? 'Simulator Active' : 'System Ready'}
-                       </span>
-                    </div>
-                 </div>
-                 <button 
-                    onClick={onClose}
-                    className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-              </div>
-
+            <div className={`flex-1 flex flex-col bg-slate-100/30 overflow-hidden ${activeTab === 'details' ? 'hidden md:flex' : 'flex'}`}>
               <div className="flex-1 overflow-hidden relative">
                 <AnimatePresence mode="wait">
                   {activeTab === 'blueprint' ? (
@@ -391,9 +399,9 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="absolute inset-0 flex flex-col p-6"
+                      className="absolute inset-0 flex flex-col p-2 md:p-6"
                     >
-                       <div className="flex-1 bg-white rounded-[2rem] border border-slate-200 shadow-inner flex flex-col overflow-hidden">
+                       <div className="flex-1 bg-white rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 shadow-inner flex flex-col overflow-hidden">
                           <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
                              <div className="flex items-center gap-2">
                                 <MessageSquare className="w-4 h-4 text-blue-600" />
@@ -413,7 +421,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
                              </div>
                           </div>
 
-                          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                          <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6">
                              {messages.map((m, i) => (
                                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                   <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed transition-all ${
@@ -470,28 +478,29 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
                   )}
                 </AnimatePresence>
               </div>
+            </div>
 
-              {/* Status Bar */}
-              <div className="h-10 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] relative z-20">
-                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                       <span>Engine: Active</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                       <Globe className="w-3 h-3 text-blue-500" />
-                       <span>Access: Public Ops</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                       <Cpu className="w-3 h-3 text-purple-500" />
-                       <span>Memory: 1.2GB/4GB</span>
-                    </div>
-                 </div>
-                 <div className="flex items-center gap-4">
-                    <span>Protocol: HTTPS/TLS 1.3</span>
-                    <span className="text-white opacity-50">LN 01-44 • COL 00</span>
-                 </div>
-              </div>
+            {/* Global Status Bar */}
+            <div className="h-10 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] relative z-20 shrink-0">
+               <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                     <span>Engine: Active</span>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-2">
+                     <Globe className="w-3 h-3 text-blue-500" />
+                     <span>Access: Public Ops</span>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-2">
+                     <Cpu className="w-3 h-3 text-purple-500" />
+                     <span>Memory: 1.2GB/4GB</span>
+                  </div>
+               </div>
+               <div className="flex items-center gap-4">
+                  <span className="hidden sm:inline">Protocol: HTTPS/TLS 1.3</span>
+                  <span className="text-white opacity-50">LN 01-44 • COL 00</span>
+               </div>
+            </div>
             </div>
           </motion.div>
         </div>
