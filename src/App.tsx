@@ -359,7 +359,7 @@ export default function App() {
                 onClick={signInWithGoogle}
                 className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98]"
               >
-                Sync Device
+                SIGN IN
               </button>
             )}
           </div>
