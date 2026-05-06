@@ -207,71 +207,71 @@ export const promptService = {
     const templates: any[] = [
       {
         category: "Coding",
-        tags: ["programming", "architecture", "dev-ops"],
-        model: "Gemini 1.5 Pro",
+        tags: ["engineering", "architecture", "expert-level"],
+        model: "Groq Llama 3",
         subjects: [
-          "Microservices Resilience with Circuit Breakers",
-          "Optimizing React Component Performance",
-          "Rust Memory Safety Patterns",
-          "Kubernetes Horizontal Pod Autoscaling",
-          "Secure JWT Authentication Flow"
+          { role: "Database Architect", topic: "Distributed Query Optimization" },
+          { role: "Cloud Infrastructure Expert", topic: "Multi-Region Kubernetes Federation" },
+          { role: "Frontend Performance Guru", topic: "Web Assembly (Wasm) Integration" },
+          { role: "Real-time Systems Engineer", topic: "WebSocket Concurrency Scaling" },
+          { role: "Security Principal", topic: "Zero-Trust Mesh Authentication" }
         ],
         prompts: [
-          "Act as a Senior Software Engineer. Explain the implementation of {subject} in a production environment. Provide a clear architectural overview, potential pitfalls to avoid, and a concise code example that demonstrates best practices. Focusing on readability and maintainability is key.",
-          "Develop a step-by-step guide for implementing {subject}. Include considerations for testing, monitoring, and scaling. The target audience is intermediate developers looking for a deep dive into functional patterns.",
-          "Review the standard approach to {subject}. Identify three common anti-patterns and propose optimized alternatives. Explain the performance implications of each change in detail."
+          "Act as a professional {role}. Your core expertise is {topic}. Guide the user through complex technical challenges, provide accurate architectural advice, and maintain a highly technical yet helpful conversation style.",
+          "You are a {role} specialized in {topic}. When chatting with the user, prioritize security, scalability, and performance. Answer questions directly but always keep the underlying best practices of {topic} in mind.",
+          "As a {role}, your mission is to assist the user with {topic}. Use your deep domain knowledge to provide nuanced answers. Don't just provide code; explain the 'why' behind the solutions while keeping the talk professional."
         ]
       },
       {
         category: "Images",
-        tags: ["art", "design", "cinematography"],
+        tags: ["cinematic", "visionary", "expert-design"],
         model: "Midjourney v6.1",
         subjects: [
-          "Cyberpunk Tokyo Street in Rain",
-          "Minimalist Japanese Tea House",
-          "Surrealist Underwater Library",
-          "Brutalist Concrete Cathedral",
-          "Steam-punk Alchemy Lab"
+          { role: "VFX Supervisor", topic: "Photorealistic Liquid Simulation in Zero Gravity" },
+          { role: "Cinematography Master", topic: "Modern Noir Lighting in a Cyber-Alley" },
+          { role: "Architectural Designer", topic: "Biophilic Skyscraper Interior at Dusk" },
+          { role: "Concept Artist", topic: "Post-Human Civilization Ruins" },
+          { role: "Product Photographer", topic: "Macro Study of Ethereal Jewelry" }
         ],
         prompts: [
-          "Cinematic shot of {subject}. Lighting: split lighting with neon accents. Camera: Hasselblad, 80mm lens, f/2.8. Color palette: deep teals and vibrant oranges. Atmosphere: moody, volumetric fog, hyper-realistic textures, 8k resolution.",
-          "A stunning {subject} designed in a minimalist style. Focus on architectural symmetry and the play of natural light and shadow. Use a neutral color palette with wood and stone textures. Highly detailed, clean lines, editorial photography style.",
-          "Digital art piece portraying {subject}. Style: ethereal surrealism. Soft lighting, pastel gradients, dream-like quality. Intricate details on every surface. 16k, high contrast, trending on ArtStation."
+          "Act as an expert {role}. Define a precise visual prompt for a {topic}. Specify lighting temperature, focal depth (f/1.8), camera lens (80mm), and atmospheric density. The goal is absolute realism and high-art aesthetic.",
+          "As a {role}, describe a {topic} with a focus on 'Material Honesty' and texture lighting. Use highly specific technical terminology for light-bouncing and volumetric rendering.",
+          "Direct a digital masterpiece of {topic} from the perspective of a {role}. Incorporate advanced composition rules like the golden ratio and leading lines to create a multi-layered narrative."
         ],
         resultImagePrefix: "https://images.unsplash.com/photo-"
       },
       {
         category: "Business",
-        tags: ["marketing", "strategy", "finance"],
+        tags: ["strategy", "executive", "high-stakes"],
         model: "GPT-4o",
         subjects: [
-          "SaaS Go-To-Market Strategy",
-          "Product-Led Growth Framework",
-          "Series A Pitch Deck Checklist",
-          "Retention Analysis for E-commerce",
-          "Corporate ESG Reporting"
+          { role: "VC Strategist", topic: "Series B Growth Unit Economics" },
+          { role: "Market Entry Consultant", topic: "Entering Emerging Tech Hubs" },
+          { role: "SaaS Growth Director", topic: "PLG (Product-Led Growth) Retention Loops" },
+          { role: "Fintech Innovation Lead", topic: "Cross-Border Settlement Protocols" },
+          { role: "ESG Policy Advisor", topic: "Corporate Carbon Neutrality Frameworks" }
         ],
         prompts: [
-          "Act as a Management Consultant. Draft a comprehensive {subject}. Break it down into executive summary, core objectives, market analysis, and key performance indicators. The tone should be professional, data-driven, and actionable.",
-          "Analyze the effectiveness of current {subject} models. Identify emerging trends and provide a roadmap for integration into a mid-sized enterprise. Focus on high ROI and long-term sustainability.",
-          "Create a presentation outline for {subject}. Each slide should have a clear purpose and supporting data points. The goal is to persuade stakeholders of a strategic shift in direction."
+          "Act as a {role}. Draft a comprehensive strategic framework for {topic}. Include a SWOT analysis, a 3-year roadmap, and specific KPIs for immediate execution. The tone should be executive-level and data-driven.",
+          "You are a {role}. Conduct a high-level review of {topic}. Identify three key market signals that indicate a paradigm shift and provide a tactical response plan for a Fortune 500 company.",
+          "As a {role}, prepare a brief for a CEO regarding {topic}. Focus on Risk Assessment, ROI projections, and stakeholder alignment strategies. Use compelling, non-hyperbolic language."
         ]
       },
       {
         category: "Writing",
-        tags: ["copywriting", "creative", "fiction"],
+        tags: ["editorial", "intellectual", "narrative"],
         model: "Claude 3.5 Sonnet",
         subjects: [
-          "The Future of Urban Migration",
-          "Ethics of Neural Link Interfaces",
-          "A Short Story about Time-Dilation",
-          "Persuasive Essay on Renewable Energy",
-          "Blog Post about Mindful Productivity"
+          { role: "Philosophical Essayist", topic: "The Ethics of Digital Identity" },
+          { role: "Technical Storyteller", topic: "The Evolution of Silicon to Quantum" },
+          { role: "Conversational Copywriter", topic: "B2B Storytelling for Hardware" },
+          { role: "Narrative Designer", topic: "Procedural Storytelling in Metaverses" },
+          { role: "Political Analyst", topic: "Universal Basic Income in the AI Era" }
         ],
         prompts: [
-          "Write a compelling {subject}. Use a tone that is engaging, thought-provoking, and slightly provocative. Weave in historical references and future predictions to build a rich narrative. The goal is to spark conversation among high-level readers.",
-          "Develop a detailed character study for a protagonist experiencing {subject}. Focus on internal monologue, sensory details, and the emotional arc of their journey. The writing should be lyrical and evocative.",
-          "Draft a long-form article exploring the intersection of technology and {subject}. Provide balanced viewpoints, expert quotes (invented), and a concluding call to action that inspires change."
+          "Act as a {role}. Write a sophisticated, 800-word piece on {topic}. Use complex sentence structures, nuanced vocabulary, and avoid clichés. The target audience is the intellectual elite.",
+          "As a {role}, craft a compelling narrative exploring {topic}. Focus on human-centric impact and emotional resonance, while maintaining a high level of factual accuracy and foresight.",
+          "You are a {role}. Develop a manifesto for {topic}. It must be persuasive, visionary, and grounded in current sociological trends. Use a voice that is both authoritative and inspiring."
         ]
       }
     ];
@@ -292,15 +292,17 @@ export const promptService = {
         const author = authors[Math.floor(Math.random() * authors.length)];
         const basePrompt = template.prompts[Math.floor(Math.random() * template.prompts.length)];
         
-        const title = `${subject}: Professional Blueprint`;
-        const content = basePrompt.replace(/{subject}/g, subject);
+        const title = `${subject.topic}: Expert ${subject.role}`;
+        const content = basePrompt
+          .replace(/{role}/g, subject.role)
+          .replace(/{topic}/g, subject.topic);
         
         const resultImage = template.resultImagePrefix ? `${template.resultImagePrefix}${unsplashIds[Math.floor(Math.random() * unsplashIds.length)]}?auto=format&fit=crop&q=80&w=1200` : undefined;
 
         try {
             await this.createPrompt({
                 title,
-                description: `A highly accurate and useful ${template.category} instruction focusing on the nuances of ${subject.toLowerCase()}.`,
+                description: `A highly accurate and useful blueprint for ${subject.topic.toLowerCase()} authored by a professional ${subject.role.toLowerCase()}.`,
                 content: content,
                 category: template.category,
                 tags: template.tags.map(t => t.toLowerCase()),

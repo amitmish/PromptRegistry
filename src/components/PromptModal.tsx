@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { Prompt } from '../types';
 import { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 
 interface PromptModalProps {
   prompt: Prompt | null;
@@ -116,12 +116,12 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
     setIsTyping(true);
 
     try {
-      const apiKey = (process.env as any).GEMINI_API_KEY;
-      if (!apiKey) {
+      const apiKey = process.env.GROQ_API_KEY;
+      if (!apiKey || apiKey === "undefined") {
         throw new Error("API Key missing");
       }
 
-      const ai = new GoogleGenAI({ apiKey });
+      const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
       
       let promptContent = prompt.content;
       Object.entries(variables).forEach(([key, val]) => {
@@ -130,40 +130,27 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
         }
       });
 
-      // User's strict requirement: "<the specific prompt> \n\n\n <user message>"
-      // We apply this to the current message and all historical user messages for maximum context consistency
-      const formattedInput = `${promptContent}\n\n\n${userMsg}`;
-
-      // Map chat history while maintaining the strict formatting internally
-      // Note: We filter out the initialization message from the AI history
+      // Map chat history while maintaining context
       const history = messages
         .filter(m => !m.content.startsWith('[SYSTEM_INITIALIZED]'))
-        .map(m => {
-          if (m.role === 'user') {
-            return {
-              role: 'user',
-              parts: [{ text: `${promptContent}\n\n\n${m.content}` }]
-            };
-          }
-          return {
-            role: 'model',
-            parts: [{ text: m.content }]
-          };
-        });
+        .map(m => ({
+          role: m.role === 'user' ? 'user' as const : 'assistant' as const,
+          content: m.content
+        }));
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [
+      const response = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { 
+            role: 'system', 
+            content: `ADHERENCE_PROTOCOL: You are an expert executing these instructions: ${promptContent}\n\nRespond naturally to the user's messages while maintaining this character and following all constraints defined above.` 
+          },
           ...history,
-          { role: 'user', parts: [{ text: formattedInput }] }
+          { role: 'user', content: userMsg }
         ],
-        config: {
-          // Additional safety: Set system instruction as well to ensure AI understands its core identity
-          systemInstruction: `CORE_PROTOCOL: Follow these instructions strictly: ${promptContent}`
-        }
       });
 
-      const text = response.text || "No response generated.";
+      const text = response.choices[0]?.message?.content || "No response generated.";
 
       setMessages(prev => [...prev, { role: 'assistant', content: text }]);
     } catch (error) {
@@ -475,7 +462,7 @@ export default function PromptModal({ prompt, isOpen, onClose }: PromptModalProp
                              </div>
                              <p className="text-[9px] text-slate-400 text-center mt-3 font-black uppercase tracking-widest italic flex items-center justify-center gap-2">
                                 <Zap className="w-3 h-3 text-blue-500" />
-                                Model: Gemini 3 Flash Preview • Multi-Turn Execution Enabled
+                                Model: Groq Llama 3.3 70B • Multi-Turn Execution Enabled
                              </p>
                           </div>
                        </div>
